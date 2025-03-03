@@ -8,3 +8,24 @@
 }
 
 /* You could add more custom styles or media queries here if needed */
+
+body {
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0; /* covers entire viewport */
+  background: radial-gradient(circle at 50% 50%, rgba(255,0,0,0.3), transparent 60%),
+              radial-gradient(circle at 30% 70%, rgba(255,0,0,0.15), transparent 70%);
+  filter: blur(30px);
+  opacity: 0.8;
+  animation: drift 10s linear infinite alternate;
+  z-index: -1; /* behind content */
+}
+@keyframes drift {
+  from { transform: translate(0,0); }
+  to   { transform: translate(-5%, -5%); }
+}
