@@ -1,45 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FuckThisClass101 - Landing Page</title>
-  <!-- Tailwind CSS CDN for utility classes -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Custom styles (overrides or additional styling) -->
-  <link rel="stylesheet" href="styles.css" />
-  <!-- GSAP animation library CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adventure Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+            font-family: Arial, sans-serif;
+            touch-action: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #player {
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            left: 50%;
+            bottom: 100px;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        .coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: gold;
+            border-radius: 50%;
+            z-index: 5;
+        }
+        .obstacle {
+            position: absolute;
+            width: 50px;
+            height: 20px;
+            background-color: #8B4513;
+            z-index: 5;
+        }
+        #ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            background-color: #228B22;
+        }
+        #score-display {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 4px #000000;
+        }
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 20;
+        }
+        #restart-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        #restart-button:hover {
+            background-color: #45a049;
+        }
+        /* Mobile controls */
+        #mobile-controls {
+            position: absolute;
+            bottom: 110px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            box-sizing: border-box;
+            z-index: 15;
+        }
+        .control-button {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #jump-button {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+        }
+        #instructions {
+            position: absolute;
+            bottom: 200px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px #000000;
+            font-size: 14px;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-white overflow-x-hidden">
-  <!-- Hero Section -->
-  <section class="min-h-screen flex items-center justify-center">
-    <div class="container mx-auto px-6 py-16 flex flex-col md:flex-row md:items-center">
-      <!-- Text Content -->
-      <div class="md:w-1/2">
-        <h1 class="text-5xl md:text-6xl font-extrabold mb-6">
-          Welcome to the Revolution
-        </h1>
-        <p class="text-xl md:text-2xl font-light mb-8">
-          Tired of boring classes and endless lectures? <strong>FuckThisClass101</strong> is here to shake things up. We take <em>education</em> and flip it on its head — transforming learning into something fun, rebellious, and effective.
-        </p>
-        <!-- Call-to-Action Button -->
-        <a href="#" class="inline-block bg-blue-600 text-white text-lg font-semibold py-3 px-6 rounded-md shadow hover:bg-blue-500 hover:shadow-lg transition">
-          Join the Movement
-        </a>
-      </div>
-      <!-- Image Content -->
-      <div class="md:w-1/2 flex justify-center md:justify-end mt-10 md:mt-0">
-        <img id="hero-image" src="images/placeholder.png" alt="Break free from boring classes" 
-             class="max-w-full rounded-lg shadow-xl hover:shadow-2xl transition-transform duration-300" />
-      </div>
+<body>
+    <div id="game-container">
+        <div id="score-display">Score: 0</div>
+        <div id="instructions">
+            Tap left/right buttons to move, tap jump button to jump
+        </div>
+        <img id="player" src="images/placeholder.png" alt="Player character">
+        <div id="ground"></div>
+        
+        <!-- Mobile controls -->
+        <div id="mobile-controls">
+            <div id="left-button" class="control-button">←</div>
+            <div id="right-button" class="control-button">→</div>
+        </div>
+        <div id="jump-button" class="control-button">↑</div>
+        
+        <div id="game-over">
+            <h2>Game Over!</h2>
+            <p>Your final score: <span id="final-score">0</span></p>
+            <button id="restart-button">Play Again</button>
+        </div>
     </div>
-  </section>
 
-  <!-- Include external JavaScript for animations -->
-  <script src="script.js" defer></script>
-  <audio id="bg-music" src="assets/demonic_theme.mp3" preload="auto"></audio>
+    <script>
+        // Game variables
+        let playerX = window.innerWidth / 2;
+        let playerY = window.innerHeight - 180; // Just above ground
+        let playerVelocityY = 0;
+        let isJumping = false;
+        let moveLeft = false;
+        let moveRight = false;
+        let score = 0;
+        let gameRunning = true;
+        
+        // HTML elements
+        const player = document.getElementById('player');
+        const gameContainer = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const gameOverDisplay = document.getElementById('game-over');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+        const leftButton = document.getElementById('left-button');
+        const rightButton = document.getElementById('right-button');
+        const jumpButton = document.getElementById('jump-button');
+        
+        // Adjust positioning for smaller screens
+        function adjustForScreenSize() {
+            if (window.innerWidth < 600) {
+                // Adjust player size for smaller screens
+                player.style.width = '40px';
+                player.style.height = '64px';
+                
+                // Adjust controls
+                document.getElementById('instructions').style.bottom = '180px';
+            }
+        }
+        
+        // Call once at startup
+        adjustForScreenSize();
+        
+        // Game settings
+        const gravity = 0.5;
+        const jumpForce = -12;
+        const moveSpeed = 5;
+        const playerWidth = parseInt(getComputedStyle(player).width);
+        const playerHeight = parseInt(getComputedStyle(player).height);
+        
+        // Initial setup
+        player.style.left = `${playerX}px`;
+        player.style.bottom = `${playerY}px`;
+        
+        // Mobile controls event handling
+        leftButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveLeft = true;
+        });
+        
+        leftButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            moveLeft = false;
+        });
+        
+        rightButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            moveRight = true;
+        });
+        
+        rightButton.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            moveRight = false;
+        });
+        
+        jumpButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!isJumping) {
+                playerVelocityY = jumpForce;
+                isJumping = true;
+            }
+        });
+
+        // Prevent default touch behaviors to avoid scrolling
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+        
+        // Spawn coins and obstacles periodically
+        function spawnCoin() {
+            if (!gameRunning) return;
+            
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            
+            const coinX = Math.random() * (window.innerWidth - 30);
+            const coinY = Math.random() * (window.innerHeight - 200);
+            
+            coin.style.left = `${coinX}px`;
+            coin.style.top = `${coinY}px`;
+            
+            gameContainer.appendChild(coin);
+            
+            // Remove coin after some time if not collected
+            setTimeout(() => {
+                if (coin && coin.parentNode === gameContainer) {
+                    gameContainer.removeChild(coin);
+                }
+            }, 5000);
+        }
+        
+        function spawnObstacle() {
+            if (!gameRunning) return;
+            
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            
+            const obstacleX = window.innerWidth; // Start from right edge
+            const obstacleY = window.innerHeight - 120; // Just above ground
+            
+            obstacle.style.left = `${obstacleX}px`;
+            obstacle.style.bottom = `${obstacleY}px`;
+            
+            gameContainer.appendChild(obstacle);
+            
+            // Move obstacle from right to left
+            let currentX = obstacleX;
+            const obstacleSpeed = window.innerWidth < 600 ? 2 : 3; // Slower on small screens
+            
+            const obstacleInterval = setInterval(() => {
+                if (!gameRunning) {
+                    clearInterval(obstacleInterval);
+                    return;
+                }
+                
+                currentX -= obstacleSpeed;
+                obstacle.style.left = `${currentX}px`;
+                
+                // Remove obstacle when it goes off screen
+                if (currentX < -50) {
+                    clearInterval(obstacleInterval);
+                    if (obstacle && obstacle.parentNode === gameContainer) {
+                        gameContainer.removeChild(obstacle);
+                    }
+                }
+                
+                // Check collision with player
+                if (isColliding(
+                    playerX - playerWidth/2, 
+                    playerY, 
+                    playerWidth, 
+                    playerHeight,
+                    currentX, 
+                    obstacleY, 
+                    50, 
+                    20
+                )) {
+                    gameOver();
+                    clearInterval(obstacleInterval);
+                }
+            }, 20);
+        }
+        
+        // Collision detection
+        function isColliding(x1, y1, width1, height1, x2, y2, width2, height2) {
+            return (
+                x1 < x2 + width2 &&
+                x1 + width1 > x2 &&
+                y1 < y2 + height2 &&
+                y1 + height1 > y2
+            );
+        }
+        
+        // Game over function
+        function gameOver() {
+            gameRunning = false;
+            finalScoreDisplay.textContent = score;
+            gameOverDisplay.style.display = 'block';
+        }
+        
+        // Restart game function
+        function restartGame() {
+            // Clear all coins and obstacles
+            document.querySelectorAll('.coin, .obstacle').forEach(el => {
+                if (el && el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+            
+            // Reset game variables
+            playerX = window.innerWidth / 2;
+            playerY = window.innerHeight - 180;
+            playerVelocityY = 0;
+            isJumping = false;
+            score = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            
+            // Reset player position
+            player.style.left = `${playerX}px`;
+            player.style.bottom = `${playerY}px`;
+            
+            // Hide game over screen
+            gameOverDisplay.style.display = 'none';
+            
+            // Restart game
+            gameRunning = true;
+            gameLoop();
+            startSpawning();
+        }
+        
+        // Input handling for keyboard (keep for desktop compatibility)
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                moveLeft = true;
+            } else if (e.key === 'ArrowRight') {
+                moveRight = true;
+            } else if (e.key === ' ' && !isJumping) {
+                // Jump only if on the ground
+                playerVelocityY = jumpForce;
+                isJumping = true;
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') {
+                moveLeft = false;
+            } else if (e.key === 'ArrowRight') {
+                moveRight = false;
+            }
+        });
+        
+        // Restart button
+        restartButton.addEventListener('click', restartGame);
+        restartButton.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            restartGame();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            adjustForScreenSize();
+        });
+        
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Handle movement
+            if (moveLeft) {
+                playerX -= moveSpeed;
+                if (playerX < playerWidth/2) {
+                    playerX = playerWidth/2;
+                }
+            }
+            if (moveRight) {
+                playerX += moveSpeed;
+                if (playerX > window.innerWidth - playerWidth/2) {
+                    playerX = window.innerWidth - playerWidth/2;
+                }
+            }
+            
+            // Apply gravity
+            playerVelocityY += gravity;
+            playerY -= playerVelocityY;
+            
+            // Ground collision
+            if (playerY < 100) {  // Ground height is 100
+                playerY = 100;
+                playerVelocityY = 0;
+                isJumping = false;
+            }
+            
+            // Update player position
+            player.style.left = `${playerX - playerWidth/2}px`;
+            player.style.bottom = `${playerY}px`;
+            
+            // Check coin collisions
+            document.querySelectorAll('.coin').forEach(coin => {
+                if (!coin) return;
+                
+                const coinRect = coin.getBoundingClientRect();
+                const playerRect = player.getBoundingClientRect();
+                
+                if (
+                    playerRect.left < coinRect.right &&
+                    playerRect.right > coinRect.left &&
+                    playerRect.top < coinRect.bottom &&
+                    playerRect.bottom > coinRect.top
+                ) {
+                    // Collect coin
+                    if (coin.parentNode === gameContainer) {
+                        gameContainer.removeChild(coin);
+                    }
+                    score += 10;
+                    scoreDisplay.textContent = `Score: ${score}`;
+                }
+            });
+            
+            // Continue game loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start spawning coins and obstacles
+        function startSpawning() {
+            // Spawn coins
+            const coinInterval = setInterval(() => {
+                if (gameRunning) {
+                    spawnCoin();
+                } else {
+                    clearInterval(coinInterval);
+                }
+            }, 1000);
+            
+            // Spawn obstacles
+            const obstacleInterval = setInterval(() => {
+                if (gameRunning) {
+                    spawnObstacle();
+                } else {
+                    clearInterval(obstacleInterval);
+                }
+            }, 2000);
+        }
+        
+        // Start the game
+        gameLoop();
+        startSpawning();
+    </script>
 </body>
 </html>
-
-
