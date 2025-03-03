@@ -4,21 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Moon Jumper</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --ground-color: #3a8040;
-            --sky-color-1: #87CEEB;
-            --sky-color-2: #1a237e;
-            --space-color: #0a0a2a;
-            --platform-color-1: #8D6E63;
-            --platform-color-2: #78909C;
-            --platform-color-3: #E0E0E0;
-            --cloud-color: rgba(255, 255, 255, 0.8);
-        }
-        
         * {
             margin: 0;
             padding: 0;
@@ -31,7 +18,7 @@
         body {
             font-family: 'Exo 2', sans-serif;
             overflow: hidden;
-            background-color: var(--sky-color-1);
+            background-color: #87CEEB;
         }
         
         #game-container {
@@ -41,7 +28,6 @@
             overflow: hidden;
         }
         
-        /* Game world - all game elements go inside this container */
         #game-world {
             position: absolute;
             width: 100%;
@@ -50,22 +36,17 @@
             left: 0;
         }
         
-        /* Background Layers */
-        .bg-layer {
+        #sky-bg {
             position: absolute;
             width: 100%;
             height: 300%;
             top: 0;
             left: 0;
+            background: linear-gradient(to top, #87CEEB 0%, #1a237e 60%, #0a0a2a 85%);
+            z-index: 1;
             transition: background-color 4s;
         }
         
-        #sky-bg {
-            background: linear-gradient(to top, var(--sky-color-1) 0%, var(--sky-color-2) 60%, var(--space-color) 85%);
-            z-index: 1;
-        }
-        
-        /* Sun and Moon */
         #sun {
             position: absolute;
             width: 80px;
@@ -92,17 +73,15 @@
             transform: translateX(-50%);
         }
         
-        /* Clouds */
         .cloud {
             position: absolute;
             z-index: 3;
             border-radius: 50%;
-            background-color: var(--cloud-color);
+            background-color: rgba(255, 255, 255, 0.8);
             opacity: 0.9;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
         
-        /* Stars */
         .star {
             position: absolute;
             width: 2px;
@@ -115,17 +94,15 @@
             box-shadow: 0 0 2px white;
         }
         
-        /* Ground */
         #ground {
             position: absolute;
             width: 100%;
             height: 100px;
             bottom: 0;
-            background: linear-gradient(to bottom, var(--ground-color), #2d6a31);
+            background: linear-gradient(to bottom, #3a8040, #2d6a31);
             z-index: 4;
         }
         
-        /* Buildings */
         .building {
             position: absolute;
             bottom: 100px;
@@ -134,7 +111,6 @@
             border-radius: 2px 2px 0 0;
         }
         
-        /* Trees */
         .tree {
             position: absolute;
             bottom: 100px;
@@ -156,18 +132,16 @@
             margin: -5px auto 0;
         }
         
-        /* Platforms */
         .platform {
             position: absolute;
             height: 15px;
             z-index: 5;
             border-radius: 4px;
-            background-color: var(--platform-color-1);
+            background-color: #8D6E63;
             box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
             transition: background-color 0.5s;
         }
         
-        /* Special platforms */
         .platform.moving {
             animation: movePlatform 5s linear infinite alternate;
         }
@@ -180,7 +154,6 @@
             background-color: #AED581;
         }
         
-        /* Power-ups */
         .power-up {
             position: absolute;
             width: 30px;
@@ -205,7 +178,6 @@
             height: 20px;
         }
         
-        /* Player */
         #player {
             position: absolute;
             width: 50px;
@@ -215,7 +187,6 @@
             transition: transform 0.1s;
         }
         
-        /* UI Elements */
         #score-display {
             position: absolute;
             top: 10px;
@@ -343,7 +314,38 @@
             cursor: pointer;
         }
         
-        /* Level indicator */
+        #sound-controls {
+            position: absolute;
+            bottom: 70px;
+            right: 20px;
+            z-index: 20;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .sound-button {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 40px;
+            text-align: center;
+        }
+        
+        .sound-button.active {
+            background-color: rgba(76, 175, 80, 0.7);
+        }
+        
+        .sound-button.muted {
+            background-color: rgba(244, 67, 54, 0.7);
+        }
+        
         #level-indicator {
             position: absolute;
             top: 50px;
@@ -358,7 +360,15 @@
             transition: opacity 1s;
         }
         
-        /* Animations */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 15;
+        }
+        
         @keyframes movePlatform {
             0% { transform: translateX(0); }
             100% { transform: translateX(100px); }
@@ -376,32 +386,6 @@
             100% { opacity: 0.2; }
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        
-        /* Particle effect */
-        .particle {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 15;
-        }
-        
-        /* Media queries for different screen sizes */
         @media (max-width: 600px) {
             #score-display, #altitude-display {
                 font-size: 14px;
@@ -426,28 +410,25 @@
                 width: 40px;
                 height: 40px;
             }
+            
+            .sound-button {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- Game world - all game elements go inside this container -->
         <div id="game-world">
-            <!-- Background layers -->
-            <div id="sky-bg" class="bg-layer"></div>
-            
-            <!-- Celestial bodies -->
+            <div id="sky-bg"></div>
             <div id="sun"></div>
             <div id="moon"></div>
-            
-            <!-- Player character -->
             <img id="player" src="images/placeholder.png" alt="Player">
-            
-            <!-- Ground -->
             <div id="ground"></div>
         </div>
         
-        <!-- UI Elements (outside the scrolling game world) -->
         <div id="score-display">Score: 0</div>
         <div id="altitude-display">Altitude: 0m</div>
         <div id="altitude-indicator">
@@ -457,7 +438,11 @@
         <div id="level-indicator">Level: Ground</div>
         <div id="instructions">Tap left side to move left, right side to move right</div>
         
-        <!-- Game over screen -->
+        <div id="sound-controls">
+            <div id="music-toggle" class="sound-button active">♫</div>
+            <div id="sfx-toggle" class="sound-button active">♪</div>
+        </div>
+        
         <div id="game-over">
             <h2>Game Over!</h2>
             <p>You reached: <span id="final-altitude">0</span> meters</p>
@@ -465,14 +450,13 @@
             <button id="restart-button">Play Again</button>
         </div>
         
-        <!-- Start screen -->
         <div id="start-screen">
             <h1>MOON JUMPER</h1>
             <p style="color: white; margin-bottom: 20px;">Jump as high as you can to reach the moon!</p>
             <button id="start-button">Start Game</button>
         </div>
     </div>
-    
+
     <script>
         // Game variables
         let gameRunning = false;
@@ -480,9 +464,9 @@
         let playerY = window.innerHeight - 150;
         let playerVelocityY = 0;
         let playerVelocityX = 0;
-        let gravity = 0.3; // Reduced gravity
+        let gravity = 0.3;
         let jumpForce = -13;
-        let isJumping = false; // Start not jumping
+        let isJumping = false;
         let score = 0;
         let altitude = 0;
         let maxAltitude = 0;
@@ -496,12 +480,11 @@
         let coins = [];
         let currentLevel = 0;
         let levelNames = ["Ground", "Sky", "Clouds", "Stratosphere", "Space"];
-        let moonHeight = 50000; // Target altitude to reach the moon
+        let moonHeight = 50000;
         let hasJetpack = false;
         let jetpackTime = 0;
         let hasShield = false;
         let shieldTime = 0;
-        let debugMode = false; // Set to true to see collision boxes
         
         // DOM elements
         const gameContainer = document.getElementById('game-container');
@@ -521,16 +504,162 @@
         const skyBg = document.getElementById('sky-bg');
         const sun = document.getElementById('sun');
         const moon = document.getElementById('moon');
+        const musicToggle = document.getElementById('music-toggle');
+        const sfxToggle = document.getElementById('sfx-toggle');
         
         // Platform settings
         const platformWidth = 70;
         const platformHeight = 15;
-        const minPlatformGap = 60; // Minimum vertical gap between platforms
-        const maxPlatformGap = 100; // Maximum vertical gap between platforms
+        const minPlatformGap = 60;
+        const maxPlatformGap = 100;
+        
+        // Audio setup
+        let musicEnabled = true;
+        let sfxEnabled = true;
+        let audioContext;
+        let sounds = {};
+        
+        // Initialize audio
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create simple sounds
+                sounds.jump = () => {
+                    if (!sfxEnabled || !audioContext) return;
+                    
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(380, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                };
+                
+                sounds.coin = () => {
+                    if (!sfxEnabled || !audioContext) return;
+                    
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                };
+                
+                sounds.powerup = () => {
+                    if (!sfxEnabled || !audioContext) return;
+                    
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.3);
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                };
+                
+                sounds.gameOver = () => {
+                    if (!sfxEnabled || !audioContext) return;
+                    
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.6);
+                };
+                
+                sounds.levelUp = () => {
+                    if (!sfxEnabled || !audioContext) return;
+                    
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(554, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.2);
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                };
+                
+                // Setup audio control buttons
+                musicToggle.addEventListener('click', () => {
+                    musicEnabled = !musicEnabled;
+                    if (musicEnabled) {
+                        musicToggle.classList.remove('muted');
+                        musicToggle.classList.add('active');
+                    } else {
+                        musicToggle.classList.remove('active');
+                        musicToggle.classList.add('muted');
+                    }
+                });
+                
+                sfxToggle.addEventListener('click', () => {
+                    sfxEnabled = !sfxEnabled;
+                    if (sfxEnabled) {
+                        sfxToggle.classList.remove('muted');
+                        sfxToggle.classList.add('active');
+                    } else {
+                        sfxToggle.classList.remove('active');
+                        sfxToggle.classList.add('muted');
+                    }
+                });
+            } catch (e) {
+                console.log("Audio not supported:", e);
+            }
+        }
         
         // Initialize the game
         function init() {
-            // Clean up any existing elements first
+            // First time setup
+            if (!audioContext) {
+                initAudio();
+            }
+            
+            // Clean up any existing elements
             document.querySelectorAll('.platform:not(#ground), .building, .tree, .cloud, .star, .power-up, .coin, .particle').forEach(el => {
                 if (el.parentNode) {
                     el.parentNode.removeChild(el);
@@ -540,7 +669,7 @@
             // Reset game variables
             gameRunning = true;
             playerX = window.innerWidth / 2;
-            playerY = window.innerHeight - 120; // Start closer to ground
+            playerY = window.innerHeight - 120;
             playerVelocityY = 0;
             playerVelocityX = 0;
             score = 0;
@@ -575,7 +704,7 @@
             createInitialPlatforms();
             createInitialClouds();
             
-            // Make sure we have a platform right under the player for the first jump
+            // Create start platform
             const startPlatform = document.createElement('div');
             startPlatform.className = 'platform';
             startPlatform.style.width = '100px';
@@ -596,18 +725,22 @@
             player.style.left = `${playerX}px`;
             player.style.bottom = `${playerY}px`;
             
+            // Play start sound
+            if (sfxEnabled && sounds.jump) {
+                sounds.jump();
+            }
+            
             // Start game loop
             requestAnimationFrame(gameLoop);
         }
         
-        // Create initial buildings
+        // Create buildings
         function createInitialBuildings() {
             for (let i = 0; i < 10; i++) {
                 createBuilding(Math.random() * window.innerWidth);
             }
         }
         
-        // Create a building
         function createBuilding(x) {
             const building = document.createElement('div');
             building.className = 'building';
@@ -629,14 +762,13 @@
             });
         }
         
-        // Create initial trees
+        // Create trees
         function createInitialTrees() {
             for (let i = 0; i < 15; i++) {
                 createTree(Math.random() * window.innerWidth);
             }
         }
         
-        // Create a tree
         function createTree(x) {
             const tree = document.createElement('div');
             tree.className = 'tree';
@@ -660,9 +792,8 @@
             });
         }
         
-        // Create initial platforms
+        // Create platforms
         function createInitialPlatforms() {
-            // Create ground platform
             const groundPlatform = {
                 x: 0,
                 y: 100,
@@ -673,33 +804,28 @@
             };
             platforms.push(groundPlatform);
             
-            // Create more frequent platforms at the beginning to help the player get started
+            // More frequent platforms at the beginning
             for (let y = window.innerHeight - 200; y > window.innerHeight - 600; y -= 60) {
                 createPlatform(y);
             }
             
-            // Then create platforms with normal spacing
+            // Normal spacing after that
             for (let y = window.innerHeight - 600; y > -1000; y -= (minPlatformGap + Math.random() * (maxPlatformGap - minPlatformGap))) {
                 createPlatform(y);
             }
         }
         
-        // Create a platform
         function createPlatform(y, forceType = null) {
             const platform = document.createElement('div');
             platform.className = 'platform';
             
-            // Random platform width
             const width = platformWidth * (0.7 + Math.random() * 0.6);
-            
-            // Random platform position
             const x = Math.random() * (window.innerWidth - width);
             
             platform.style.width = `${width}px`;
             platform.style.left = `${x}px`;
             platform.style.bottom = `${y}px`;
             
-            // Platform types
             let type = forceType;
             if (!type) {
                 const typeRoll = Math.random();
@@ -738,7 +864,7 @@
                 active: true
             });
             
-            // Sometimes add power-ups or coins above platforms
+            // Add power-ups or coins
             if (y > 1000) {
                 if (Math.random() < 0.05) {
                     createPowerUp(x + width / 2, y + 30);
@@ -750,7 +876,7 @@
             return platform;
         }
         
-        // Create initial clouds
+        // Create clouds
         function createInitialClouds() {
             for (let i = 0; i < 10; i++) {
                 createCloud(
@@ -760,7 +886,6 @@
             }
         }
         
-        // Create a cloud
         function createCloud(x, y) {
             const cloud = document.createElement('div');
             cloud.className = 'cloud';
@@ -811,7 +936,7 @@
             }
         }
         
-        // Create a power-up
+        // Create power-ups
         function createPowerUp(x, y) {
             const powerUp = document.createElement('div');
             powerUp.className = 'power-up';
@@ -837,7 +962,7 @@
             });
         }
         
-        // Create a coin
+        // Create coins
         function createCoin(x, y) {
             const coin = document.createElement('div');
             coin.className = 'coin';
@@ -898,47 +1023,31 @@
             }
         }
         
-        // Check if player is on a platform
+        // Platform collision detection
         function isOnPlatform() {
-            // Only check for platform collision if player is moving downward or at rest
-            if (playerVelocityY < -2) return false; // Strong upward movement, not on platform
+            if (playerVelocityY < -2) return false;
             
-            // Get player hitbox (smaller than visual size)
-            const playerHitboxWidth = 30;
-            const playerFeet = playerY - 5; // Bottom of player hitbox
+            const playerFeet = playerY - 5;
             
             for (let i = 0; i < platforms.length; i++) {
                 const platform = platforms[i];
                 
-                // Skip inactive platforms
                 if (platform.type === 'breakable' && !platform.active) continue;
                 
-                // Check collision - player's position (center point) must be within platform width
-                // and player's feet must be at or slightly below platform top
                 if (
                     playerX >= platform.x && 
                     playerX <= platform.x + platform.width &&
-                    playerFeet <= platform.y + platformHeight + 10 && // Allow a bit of overlap
-                    playerFeet >= platform.y - 10 // Allow a bit of range for collision
+                    playerFeet <= platform.y + platformHeight + 10 &&
+                    playerFeet >= platform.y - 10
                 ) {
-                    // Debug visualization of collision
-                    if (debugMode) {
-                        console.log("Collision with platform:", platform);
-                        platform.element.style.border = "2px solid red";
-                        setTimeout(() => {
-                            platform.element.style.border = "none";
-                        }, 300);
-                    }
-                    
-                    // Special platform effects
                     if (platform.type === 'breakable') {
                         breakPlatform(platform);
-                        return false; // Falls through
+                        return false;
                     } else if (platform.type === 'bouncy') {
-                        jumpForce = -18; // Extra bounce
+                        jumpForce = -18;
                         createParticles(playerX, playerY, 10, '#AED581');
                     } else {
-                        jumpForce = -13; // Normal jump
+                        jumpForce = -13;
                     }
                     
                     return platform;
@@ -948,7 +1057,7 @@
             return false;
         }
         
-        // Break a platform
+        // Break platform
         function breakPlatform(platform) {
             platform.active = false;
             platform.element.style.opacity = '0.5';
@@ -962,7 +1071,7 @@
             }, 300);
         }
         
-        // Check collision with power-ups
+        // Power-up collision
         function checkPowerUpCollision() {
             for (let i = 0; i < powerUps.length; i++) {
                 const powerUp = powerUps[i];
@@ -971,35 +1080,33 @@
                     Math.abs(playerX - powerUp.x) < 30 &&
                     Math.abs(playerY - powerUp.y) < 30
                 ) {
-                    // Collect power-up
                     if (powerUp.element.parentNode) {
                         powerUp.element.parentNode.removeChild(powerUp.element);
                     }
                     
-                    // Apply power-up effect
                     if (powerUp.type === 'jetpack') {
                         hasJetpack = true;
-                        jetpackTime = 300; // Frames of jetpack time (5 seconds at 60fps)
+                        jetpackTime = 300;
                         createParticles(playerX, playerY - 20, 20, '#FF9800');
                         score += 30;
+                        if (sfxEnabled && sounds.powerup) sounds.powerup();
                     } else if (powerUp.type === 'shield') {
                         hasShield = true;
-                        shieldTime = 600; // 10 seconds
+                        shieldTime = 600;
                         createParticles(playerX, playerY, 20, '#2196F3');
                         score += 20;
+                        if (sfxEnabled && sounds.powerup) sounds.powerup();
                     }
                     
-                    // Remove from array
                     powerUps.splice(i, 1);
                     i--;
                     
-                    // Update score
                     scoreDisplay.textContent = `Score: ${score}`;
                 }
             }
         }
         
-        // Check collision with coins
+        // Coin collision
         function checkCoinCollision() {
             for (let i = 0; i < coins.length; i++) {
                 const coin = coins[i];
@@ -1008,32 +1115,29 @@
                     Math.abs(playerX - coin.x) < 25 &&
                     Math.abs(playerY - coin.y) < 25
                 ) {
-                    // Collect coin
                     if (coin.element.parentNode) {
                         coin.element.parentNode.removeChild(coin.element);
                     }
                     
-                    // Create particle effect
                     createParticles(coin.x, coin.y, 10, '#FFD600');
                     
-                    // Add score
+                    if (sfxEnabled && sounds.coin) sounds.coin();
+                    
                     score += 10;
                     scoreDisplay.textContent = `Score: ${score}`;
                     
-                    // Remove from array
                     coins.splice(i, 1);
                     i--;
                 }
             }
         }
         
-        // Update platform positions (for moving platforms)
+        // Update moving platforms
         function updatePlatforms() {
             for (let i = 0; i < platforms.length; i++) {
                 const platform = platforms[i];
                 
                 if (platform.type === 'moving') {
-                    // Get current transform
                     const transform = window.getComputedStyle(platform.element).getPropertyValue('transform');
                     if (transform && transform !== 'none') {
                         const matrix = new DOMMatrix(transform);
@@ -1043,19 +1147,17 @@
             }
         }
         
-        // Generate new content as player ascends
+        // Generate new content
         function generateContent() {
             const visibleTop = viewportOffset + window.innerHeight;
             const highestPlatform = Math.max(...platforms.map(p => p.y));
             
-            // Create new platforms
             if (highestPlatform < visibleTop + 1000) {
                 for (let y = highestPlatform + minPlatformGap; y < visibleTop + 2000; y += (minPlatformGap + Math.random() * (maxPlatformGap - minPlatformGap))) {
                     createPlatform(y);
                 }
             }
             
-            // Create new clouds
             if (altitude > 500 && clouds.length < 20 && Math.random() < 0.02) {
                 createCloud(
                     Math.random() * window.innerWidth,
@@ -1064,7 +1166,7 @@
             }
         }
         
-        // Update game level based on altitude
+        // Update game level
         function updateLevel() {
             let newLevel = 0;
             
@@ -1083,29 +1185,22 @@
                 levelIndicator.textContent = `Level: ${levelNames[currentLevel]}`;
                 levelIndicator.style.opacity = '1';
                 
-                // Fade out level indicator after 3 seconds
+                if (sfxEnabled && sounds.levelUp) sounds.levelUp();
+                
                 setTimeout(() => {
                     levelIndicator.style.opacity = '0';
                 }, 3000);
                 
-                // Visual changes based on level
+                // Visual changes
                 switch (currentLevel) {
-                    case 1: // Sky
-                        // Already default sky color
-                        break;
-                    case 2: // Clouds
-                        // More blue sky
-                        break;
-                    case 3: // Stratosphere
-                        // Start showing stars
+                    case 3:
                         stars.forEach(star => {
                             if (star.y <= altitude + 2000) {
                                 star.element.style.opacity = '1';
                             }
                         });
                         break;
-                    case 4: // Space
-                        // All stars visible, darker sky
+                    case 4:
                         stars.forEach(star => {
                             star.element.style.opacity = '1';
                         });
@@ -1113,7 +1208,7 @@
                 }
             }
             
-            // Show stars as player ascends
+            // Show stars gradually
             if (altitude > 10000) {
                 stars.forEach(star => {
                     if (star.y <= altitude + 2000) {
@@ -1132,41 +1227,26 @@
                 sun.style.top = `${Math.max(sunY, -100)}px`;
                 
                 if (altitude > 30000) {
-                    // Start showing the moon
                     const moonY = -120 + ((altitude - 30000) / 200);
                     moon.style.top = `${Math.min(moonY, 50)}px`;
                 }
             }
             
-            // Change background gradient based on altitude
+            // Change background
             if (altitude < 10000) {
-                // Sky to darker sky
                 const blueRatio = Math.min(altitude / 10000, 1);
                 skyBg.style.background = `linear-gradient(to top, 
-                    var(--sky-color-1) ${10 - blueRatio * 10}%, 
-                    var(--sky-color-2) ${60 - blueRatio * 20}%, 
-                    var(--space-color) ${85 - blueRatio * 15}%)`;
+                    #87CEEB ${10 - blueRatio * 10}%, 
+                    #1a237e ${60 - blueRatio * 20}%, 
+                    #0a0a2a ${85 - blueRatio * 15}%)`;
             } else if (altitude >= 10000 && altitude < 30000) {
-                // Darker sky to space
                 const spaceRatio = Math.min((altitude - 10000) / 20000, 1);
                 skyBg.style.background = `linear-gradient(to top, 
-                    var(--sky-color-2) ${10 - spaceRatio * 10}%, 
-                    var(--space-color) ${60 - spaceRatio * 30}%)`;
+                    #1a237e ${10 - spaceRatio * 10}%, 
+                    #0a0a2a ${60 - spaceRatio * 30}%)`;
             } else {
-                // Full space background
-                skyBg.style.backgroundColor = 'var(--space-color)';
+                skyBg.style.backgroundColor = '#0a0a2a';
             }
-        }
-        
-        // Game over function
-        function gameOver() {
-            gameRunning = false;
-            finalAltitude.textContent = Math.floor(maxAltitude);
-            finalScore.textContent = score;
-            gameOverScreen.style.display = 'block';
-            
-            // Create explosion effect
-            createParticles(playerX, playerY, 30, '#F44336');
         }
         
         // Game loop
@@ -1175,29 +1255,24 @@
             
             // Apply gravity or jetpack
             if (hasJetpack && jetpackTime > 0) {
-                playerVelocityY = -5; // Constant upward force
+                playerVelocityY = -5;
                 jetpackTime--;
                 
-                // Jetpack particles
                 if (gameLoop.frame % 2 === 0) {
                     createParticles(playerX, playerY - 20, 2, '#FF9800');
                 }
                 
-                // End jetpack
                 if (jetpackTime <= 0) {
                     hasJetpack = false;
                 }
             } else {
-                // Apply gravity with a terminal velocity
                 playerVelocityY += gravity;
-                // Limit maximum falling speed
                 if (playerVelocityY > 12) playerVelocityY = 12;
             }
             
             // Shield countdown
             if (hasShield && shieldTime > 0) {
                 shieldTime--;
-                // End shield
                 if (shieldTime <= 0) {
                     hasShield = false;
                 }
@@ -1211,18 +1286,17 @@
             if (playerX < 25) playerX = 25;
             if (playerX > window.innerWidth - 25) playerX = window.innerWidth - 25;
             
-            // Check if player is on a platform
+            // Platform collision
             const platform = isOnPlatform();
             if (platform) {
-                // Land on the platform
                 playerY = platform.y + platformHeight;
                 playerVelocityY = jumpForce;
                 isJumping = true;
                 
-                // Jump particles
+                if (sfxEnabled && sounds.jump) sounds.jump();
+                
                 createParticles(playerX, playerY, 5, '#ffffff');
                 
-                // Make player bounce slightly for visual effect
                 player.animate([
                     { transform: 'translateX(-50%) scaleY(0.8)' },
                     { transform: 'translateX(-50%) scaleY(1.1)' },
@@ -1233,77 +1307,61 @@
                 });
             }
             
-            // Check power-up collision
+            // Check collisions
             checkPowerUpCollision();
-            
-            // Check coin collision
             checkCoinCollision();
-            
-            // Update moving platforms
             updatePlatforms();
             
-            // Calculate altitude (highest point reached)
+            // Update altitude
             altitude = playerY;
             maxAltitude = Math.max(maxAltitude, altitude);
-            
-            // Update altitude display
             altitudeDisplay.textContent = `Altitude: ${Math.floor(altitude)}m`;
             
-            // Generate new content
+            // Generate content and update level
             generateContent();
-            
-            // Update level
             updateLevel();
             
-            // Add shield at the start to prevent instant death
+            // Add shield at start
             if (gameLoop.frame < 100 && !hasShield) {
                 hasShield = true;
                 shieldTime = 100;
             }
             
-            // Check if player fell off screen (with a bigger margin)
+            // Check if player fell
             if (playerY < viewportOffset - 150) {
                 if (hasShield) {
-                    // Use shield to save player
                     hasShield = false;
                     shieldTime = 0;
-                    // Teleport player to last safe position
                     playerY = viewportOffset + 100;
                     playerVelocityY = jumpForce;
-                    // Visual effect for shield use
                     createParticles(playerX, playerY, 20, '#2196F3');
                 } else {
-                    // Game over
                     gameOver();
                     return;
                 }
             }
             
-            // Check if player reached the moon (win condition)
+            // Check win condition
             if (altitude >= moonHeight) {
-                // Win game
                 gameRunning = false;
                 finalAltitude.textContent = Math.floor(maxAltitude);
-                finalScore.textContent = score + 1000; // Bonus for reaching the moon
+                finalScore.textContent = score + 1000;
                 document.querySelector('#game-over h2').textContent = 'You Reached the Moon!';
                 gameOverScreen.style.display = 'block';
                 return;
             }
             
-            // Scroll view to follow player (with some leeway)
+            // Camera follow
             const idealOffset = playerY - window.innerHeight / 3;
             if (idealOffset > viewportOffset) {
                 viewportOffset += (idealOffset - viewportOffset) * 0.1;
-                
-                // Move the game world instead of the container
                 gameWorld.style.transform = `translateY(${viewportOffset}px)`;
             }
             
-            // Update player position
+            // Update player visual
             player.style.left = `${playerX}px`;
             player.style.bottom = `${playerY}px`;
             
-            // Visual effects for player
             if (hasJetpack) {
                 player.style.filter = 'drop-shadow(0 0 10px #FF9800)';
             } else if (hasShield) {
@@ -1317,39 +1375,46 @@
             requestAnimationFrame(gameLoop);
         }
         
-        // Handle touch input
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            finalAltitude.textContent = Math.floor(maxAltitude);
+            finalScore.textContent = score;
+            gameOverScreen.style.display = 'block';
+            
+            if (sfxEnabled && sounds.gameOver) sounds.gameOver();
+            
+            createParticles(playerX, playerY, 30, '#F44336');
+        }
+        
+        // Touch controls
         function handleTouchMove(e) {
             e.preventDefault();
             
-            // Get touch position
             const touch = e.touches[0];
             const touchX = touch.clientX;
             
-            // Move player based on which side of screen is touched
             if (touchX < window.innerWidth / 2) {
-                // Move left
                 playerVelocityX = -4;
-                player.style.transform = 'translateX(-50%) scaleX(-1)'; // Flip sprite
+                player.style.transform = 'translateX(-50%) scaleX(-1)';
             } else {
-                // Move right
                 playerVelocityX = 4;
-                player.style.transform = 'translateX(-50%) scaleX(1)'; // Normal sprite
+                player.style.transform = 'translateX(-50%) scaleX(1)';
             }
         }
         
         function handleTouchEnd() {
-            // Stop moving
             playerVelocityX = 0;
         }
         
-        // Handle keyboard input (for testing on desktop)
+        // Keyboard controls
         function handleKeyDown(e) {
             if (e.key === 'ArrowLeft') {
                 playerVelocityX = -4;
-                player.style.transform = 'translateX(-50%) scaleX(-1)'; // Flip sprite
+                player.style.transform = 'translateX(-50%) scaleX(-1)';
             } else if (e.key === 'ArrowRight') {
                 playerVelocityX = 4;
-                player.style.transform = 'translateX(-50%) scaleX(1)'; // Normal sprite
+                player.style.transform = 'translateX(-50%) scaleX(1)';
             }
         }
         
@@ -1364,13 +1429,17 @@
         document.addEventListener('touchend', handleTouchEnd);
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
+        
         restartButton.addEventListener('click', () => {
             gameOverScreen.style.display = 'none';
             init();
         });
         
-        // Start button
         startButton.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
             startScreen.style.display = 'none';
             init();
         });
