@@ -1,0 +1,10 @@
+/* Tailwind base and components are loaded via the CDN in index.html. */
+/* You can add custom overrides or additional styles below. */
+
+/* Example custom style for hover effect on the hero image */
+#hero-image:hover {
+  transform: translateY(-4px);
+  transition: transform 0.3s ease;
+}
+
+/* You could add more custom styles or media queries here if needed */
