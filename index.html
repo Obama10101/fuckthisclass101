@@ -3,33 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Adventure Runner</title>
-    <!-- Google Fonts -->
+    <title>Moon Jumper</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #ff7e5f;
-            --secondary-color: #feb47b;
-            --accent-color: #7b68ee;
-            --dark-color: #2a2a38;
-            --light-color: #f5f5f5;
+            --ground-color: #3a8040;
+            --sky-color-1: #87CEEB;
+            --sky-color-2: #1a237e;
+            --space-color: #0a0a2a;
+            --platform-color-1: #8D6E63;
+            --platform-color-2: #78909C;
+            --platform-color-3: #E0E0E0;
+            --cloud-color: rgba(255, 255, 255, 0.8);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         
         body {
-            margin: 0;
-            padding: 0;
+            font-family: 'Exo 2', sans-serif;
             overflow: hidden;
-            font-family: 'Nunito', sans-serif;
-            touch-action: none;
-            background-color: var(--dark-color);
+            background-color: var(--sky-color-1);
         }
         
         #game-container {
@@ -39,112 +41,227 @@
             overflow: hidden;
         }
         
-        /* Parallax Backgrounds */
-        .background {
+        /* Background Layers */
+        .bg-layer {
             position: absolute;
             width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: bottom;
+            height: 300%;
+            top: 0;
+            left: 0;
+            transition: background-color 4s;
         }
         
-        #bg-sky {
-            background: linear-gradient(to bottom, #1a2980, #26d0ce);
+        #sky-bg {
+            background: linear-gradient(to top, var(--sky-color-1) 0%, var(--sky-color-2) 60%, var(--space-color) 85%);
             z-index: 1;
         }
         
-        #bg-clouds {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1000' opacity='0.5'%3E%3Cpath fill='%23ffffff' d='M184,186c-19.9,0-36,16.1-36,36c0,4.3,0.8,8.5,2.2,12.3c-5.9-2.1-12.2-3.3-18.8-3.3c-30.2,0-54.7,24.5-54.7,54.7c0,30.2,24.5,54.7,54.7,54.7c25.2,0,46.5-17.1,52.9-40.4c5.2,2.4,11,3.7,17.1,3.7c22.5,0,40.8-18.2,40.8-40.8C241.7,236.7,216.8,186,184,186z'/%3E%3Cpath fill='%23ffffff' d='M823.3,134.6c-14,0-25.3,11.3-25.3,25.3c0,3,0.5,6,1.5,8.7c-4.2-1.5-8.6-2.3-13.2-2.3c-21.3,0-38.5,17.2-38.5,38.5c0,21.3,17.2,38.5,38.5,38.5c17.7,0,32.7-12,37.2-28.4c3.7,1.7,7.7,2.6,12,2.6c15.8,0,28.7-12.8,28.7-28.7C864.3,170.6,846.7,134.6,823.3,134.6z'/%3E%3Cpath fill='%23ffffff' d='M605.3,308.6c-14,0-25.3,11.3-25.3,25.3c0,3,0.5,6,1.5,8.7c-4.2-1.5-8.6-2.3-13.2-2.3c-21.3,0-38.5,17.2-38.5,38.5c0,21.3,17.2,38.5,38.5,38.5c17.7,0,32.7-12,37.2-28.4c3.7,1.7,7.7,2.6,12,2.6c15.8,0,28.7-12.8,28.7-28.7C646.3,344.6,628.7,308.6,605.3,308.6z'/%3E%3C/svg%3E");
+        /* Sun and Moon */
+        #sun {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #FFF176 20%, #FFD54F 50%, #FFB300 100%);
+            border-radius: 50%;
             z-index: 2;
-            opacity: 0.7;
-            animation: scrollClouds 120s linear infinite;
+            box-shadow: 0 0 30px #FFD54F;
+            top: 50px;
+            right: 50px;
+            transition: all 2s;
         }
         
-        #bg-mountains {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 400' preserveAspectRatio='none'%3E%3Cpath fill='%236b5b95' d='M0,400 L0,200 L200,300 L500,150 L800,300 L1000,100 L1000,400 Z'/%3E%3Cpath fill='%23574b7c' d='M0,400 L0,250 L300,320 L500,200 L700,350 L1000,200 L1000,400 Z'/%3E%3C/svg%3E");
-            height: 50%;
+        #moon {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ECEFF1 30%, #CFD8DC 70%, #B0BEC5 100%);
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 0 20px #CFD8DC;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* Clouds */
+        .cloud {
+            position: absolute;
+            z-index: 3;
+            border-radius: 50%;
+            background-color: var(--cloud-color);
+            opacity: 0.9;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Stars */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            border-radius: 50%;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 2s;
+            box-shadow: 0 0 2px white;
+        }
+        
+        /* Ground */
+        #ground {
+            position: absolute;
+            width: 100%;
+            height: 100px;
             bottom: 0;
-            background-size: 100% 100%;
+            background: linear-gradient(to bottom, var(--ground-color), #2d6a31);
+            z-index: 4;
+        }
+        
+        /* Buildings */
+        .building {
+            position: absolute;
+            bottom: 100px;
+            z-index: 3;
+            background: linear-gradient(to bottom, #546E7A, #37474F);
+            border-radius: 2px 2px 0 0;
+        }
+        
+        /* Trees */
+        .tree {
+            position: absolute;
+            bottom: 100px;
             z-index: 3;
         }
         
-        #ground {
+        .tree-trunk {
+            width: 10px;
+            height: 30px;
+            background-color: #5D4037;
+            margin: 0 auto;
+        }
+        
+        .tree-top {
+            width: 40px;
+            height: 60px;
+            background-color: #2E7D32;
+            border-radius: 50% 50% 5% 5%;
+            margin: -5px auto 0;
+        }
+        
+        /* Platforms */
+        .platform {
             position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 100px;
-            background: linear-gradient(to bottom, #8fd3f4 0%, #84fab0 100%);
-            z-index: 4;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+            height: 15px;
+            z-index: 5;
+            border-radius: 4px;
+            background-color: var(--platform-color-1);
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+            transition: background-color 0.5s;
         }
         
-        /* Ground pattern */
-        #ground::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 10px;
-            background: linear-gradient(to right, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0) 60%, rgba(255,255,255,0.2) 80%, rgba(255,255,255,0) 100%);
+        /* Special platforms */
+        .platform.moving {
+            animation: movePlatform 5s linear infinite alternate;
         }
         
-        /* Player styling */
-        #player {
-            position: absolute;
-            width: 50px;
-            height: 80px;
-            left: 50%;
-            bottom: 100px;
-            transform: translateX(-50%);
-            z-index: 10;
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
-            transition: transform 0.1s ease;
+        .platform.breakable {
+            background-color: #FFAB91;
         }
         
-        /* Jump animation */
-        .jumping {
-            animation: playerJump 0.5s ease-out;
+        .platform.bouncy {
+            background-color: #AED581;
         }
         
-        /* Coin styling */
-        .coin {
+        /* Power-ups */
+        .power-up {
             position: absolute;
             width: 30px;
             height: 30px;
+            border-radius: 50%;
             z-index: 5;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23FFD700' stroke='%23B8860B' stroke-width='3'/%3E%3Ccircle cx='50' cy='50' r='35' fill='%23FFEB3B' stroke='%23B8860B' stroke-width='0'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='40' font-weight='bold' text-anchor='middle' fill='%23B8860B'%3E$%3C/text%3E%3C/svg%3E");
-            background-size: contain;
-            animation: floatCoin 2s ease-in-out infinite, rotateCoin 3s linear infinite;
-            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3));
+            animation: float 2s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
         
-        /* Obstacle styling */
-        .obstacle {
+        .jetpack {
+            background: radial-gradient(circle, #FFD600 30%, #FF9800 100%);
+        }
+        
+        .shield {
+            background: radial-gradient(circle, #90CAF9 30%, #2196F3 100%);
+        }
+        
+        .coin {
+            background: radial-gradient(circle, #FFF59D 30%, #FFD600 100%);
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Player */
+        #player {
             position: absolute;
             width: 50px;
-            height: 30px;
-            z-index: 5;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cpath d='M10,60 L0,30 L20,0 L80,0 L100,30 L90,60 Z' fill='%238B4513' stroke='%23663300' stroke-width='3'/%3E%3Cpath d='M20,50 L15,30 L25,10 L75,10 L85,30 L80,50 Z' fill='%23A0522D'/%3E%3C/svg%3E");
-            background-size: contain;
-            background-repeat: no-repeat;
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
+            height: 50px;
+            z-index: 10;
+            transform: translateX(-50%);
+            transition: transform 0.1s;
         }
         
         /* UI Elements */
         #score-display {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            font-family: 'Lilita One', cursive;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
             color: white;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            padding: 10px 20px;
-            border-radius: 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
             z-index: 20;
-            animation: pulse 2s infinite;
+        }
+        
+        #altitude-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+            z-index: 20;
+        }
+        
+        #altitude-indicator {
+            position: absolute;
+            right: 20px;
+            top: 60px;
+            width: 20px;
+            height: 60%;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            z-index: 20;
+            overflow: hidden;
+        }
+        
+        #altitude-bar {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #4CAF50, #8BC34A, #FFEB3B, #FF9800, #F44336);
+            border-radius: 10px;
+            transition: height 0.5s;
+        }
+        
+        #moon-indicator {
+            position: absolute;
+            right: 20px;
+            top: 30px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            z-index: 21;
         }
         
         #game-over {
@@ -152,643 +269,1013 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 30px;
-            border-radius: 20px;
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
             display: none;
-            z-index: 30;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 2px solid rgba(255,255,255,0.1);
-        }
-        
-        #game-over h2 {
-            font-family: 'Lilita One', cursive;
-            font-size: 36px;
-            margin-bottom: 15px;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        #final-score {
-            color: var(--primary-color);
-            font-weight: bold;
-            font-size: 28px;
+            z-index: 100;
+            backdrop-filter: blur(5px);
         }
         
         #restart-button {
             margin-top: 20px;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 10px 20px;
+            background-color: #4CAF50;
             border: none;
             color: white;
+            font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 18px;
-            border-radius: 50px;
-            font-family: 'Nunito', sans-serif;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
         }
         
-        #restart-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
-        }
-        
-        #restart-button:active {
-            transform: translateY(0px);
-        }
-        
-        /* Mobile Controls */
-        #mobile-controls {
+        #instructions {
             position: absolute;
-            bottom: 120px;
+            bottom: 20px;
             left: 0;
             width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            box-sizing: border-box;
+            text-align: center;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            font-size: 14px;
             z-index: 20;
         }
         
-        .control-button {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
-            user-select: none;
-            -webkit-user-select: none;
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+        
+        #start-screen h1 {
             color: white;
-            transition: all 0.2s ease;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
         
-        .control-button:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        #jump-button {
-            position: absolute;
-            right: 20px;
-            bottom: 20px;
-            background: rgba(255, 126, 95, 0.3);
-            border: 2px solid rgba(255, 126, 95, 0.5);
-        }
-        
-        /* Game title */
-        #game-title {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-family: 'Lilita One', cursive;
-            font-size: 28px;
+        #start-button {
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            border: none;
             color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        /* Level indicator */
+        #level-indicator {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
             z-index: 20;
-        }
-        
-        /* Particles */
-        .particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 25;
+            opacity: 0;
+            transition: opacity 1s;
         }
         
         /* Animations */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        @keyframes movePlatform {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100px); }
         }
         
-        @keyframes floatCoin {
+        @keyframes float {
             0% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
             100% { transform: translateY(0); }
         }
         
-        @keyframes rotateCoin {
-            0% { background-size: 100% 100%; }
-            25% { background-size: 95% 100%; }
-            50% { background-size: 80% 100%; }
-            75% { background-size: 95% 100%; }
-            100% { background-size: 100% 100%; }
+        @keyframes blink {
+            0% { opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { opacity: 0.2; }
         }
         
-        @keyframes playerJump {
-            0% { transform: translateX(-50%) rotate(0deg); }
-            25% { transform: translateX(-50%) rotate(-5deg); }
-            75% { transform: translateX(-50%) rotate(5deg); }
-            100% { transform: translateX(-50%) rotate(0deg); }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        @keyframes scrollClouds {
-            0% { background-position: 0 0; }
-            100% { background-position: 1000% 0; }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
         
-        /* Instructions */
-        #instructions {
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        /* Particle effect */
+        .particle {
             position: absolute;
-            top: 70px;
-            left: 20px;
-            color: white;
-            font-size: 14px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 8px 15px;
-            border-radius: 50px;
-            backdrop-filter: blur(5px);
-            opacity: 0.8;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
             z-index: 15;
         }
         
-        /* Responsive adjustments */
+        /* Media queries for different screen sizes */
         @media (max-width: 600px) {
-            #score-display {
-                top: 10px;
-                left: 10px;
-                font-size: 20px;
-                padding: 8px 15px;
+            #score-display, #altitude-display {
+                font-size: 14px;
+                padding: 5px;
             }
             
-            #game-title {
-                top: 10px;
+            #level-indicator {
+                font-size: 14px;
+                padding: 5px;
+            }
+            
+            #altitude-indicator {
+                width: 15px;
                 right: 10px;
-                font-size: 20px;
-            }
-            
-            .control-button {
-                width: 70px;
-                height: 70px;
             }
             
             #instructions {
-                top: 50px;
-                left: 10px;
                 font-size: 12px;
+            }
+            
+            #player {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- Parallax backgrounds -->
-        <div id="bg-sky" class="background"></div>
-        <div id="bg-clouds" class="background"></div>
-        <div id="bg-mountains" class="background"></div>
+        <!-- Background layers -->
+        <div id="sky-bg" class="bg-layer"></div>
         
-        <!-- Game elements -->
-        <div id="game-title">ADVENTURE RUNNER</div>
-        <div id="score-display">Score: 0</div>
-        <div id="instructions">Tap left/right to move, tap jump to jump</div>
-        <img id="player" src="images/placeholder.png" alt="Player character">
+        <!-- Celestial bodies -->
+        <div id="sun"></div>
+        <div id="moon"></div>
+        
+        <!-- Player character -->
+        <img id="player" src="images/placeholder.png" alt="Player">
+        
+        <!-- Ground -->
         <div id="ground"></div>
         
-        <!-- Mobile controls -->
-        <div id="mobile-controls">
-            <div id="left-button" class="control-button">←</div>
-            <div id="right-button" class="control-button">→</div>
+        <!-- UI Elements -->
+        <div id="score-display">Score: 0</div>
+        <div id="altitude-display">Altitude: 0m</div>
+        <div id="altitude-indicator">
+            <div id="altitude-bar"></div>
         </div>
-        <div id="jump-button" class="control-button">↑</div>
+        <div id="moon-indicator"></div>
+        <div id="level-indicator">Level: Ground</div>
+        <div id="instructions">Tap left side to move left, right side to move right</div>
         
         <!-- Game over screen -->
         <div id="game-over">
-            <h2>GAME OVER!</h2>
-            <p>Your final score:</p>
-            <p id="final-score">0</p>
+            <h2>Game Over!</h2>
+            <p>You reached: <span id="final-altitude">0</span> meters</p>
+            <p>Final score: <span id="final-score">0</span></p>
             <button id="restart-button">Play Again</button>
         </div>
+        
+        <!-- Start screen -->
+        <div id="start-screen">
+            <h1>MOON JUMPER</h1>
+            <p style="color: white; margin-bottom: 20px;">Jump as high as you can to reach the moon!</p>
+            <button id="start-button">Start Game</button>
+        </div>
     </div>
-
+    
     <script>
         // Game variables
+        let gameRunning = false;
         let playerX = window.innerWidth / 2;
-        let playerY = window.innerHeight - 180;
+        let playerY = window.innerHeight - 150;
         let playerVelocityY = 0;
-        let isJumping = false;
-        let moveLeft = false;
-        let moveRight = false;
+        let playerVelocityX = 0;
+        let gravity = 0.4;
+        let jumpForce = -15;
+        let isJumping = true;
         let score = 0;
-        let gameRunning = true;
+        let altitude = 0;
+        let maxAltitude = 0;
+        let viewportOffset = 0;
+        let platforms = [];
+        let buildings = [];
+        let trees = [];
+        let clouds = [];
+        let stars = [];
+        let powerUps = [];
+        let coins = [];
+        let currentLevel = 0;
+        let levelNames = ["Ground", "Sky", "Clouds", "Stratosphere", "Space"];
+        let moonHeight = 50000; // Target altitude to reach the moon
+        let hasJetpack = false;
+        let jetpackTime = 0;
+        let hasShield = false;
+        let shieldTime = 0;
         
-        // HTML elements
-        const player = document.getElementById('player');
+        // DOM elements
         const gameContainer = document.getElementById('game-container');
+        const player = document.getElementById('player');
+        const ground = document.getElementById('ground');
         const scoreDisplay = document.getElementById('score-display');
-        const gameOverDisplay = document.getElementById('game-over');
-        const finalScoreDisplay = document.getElementById('final-score');
+        const altitudeDisplay = document.getElementById('altitude-display');
+        const altitudeBar = document.getElementById('altitude-bar');
+        const gameOverScreen = document.getElementById('game-over');
+        const finalAltitude = document.getElementById('final-altitude');
+        const finalScore = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
-        const leftButton = document.getElementById('left-button');
-        const rightButton = document.getElementById('right-button');
-        const jumpButton = document.getElementById('jump-button');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const levelIndicator = document.getElementById('level-indicator');
+        const skyBg = document.getElementById('sky-bg');
+        const sun = document.getElementById('sun');
+        const moon = document.getElementById('moon');
         
-        // Game settings
-        const gravity = 0.5;
-        const jumpForce = -12;
-        const moveSpeed = 5;
-        const playerWidth = 50;
-        const playerHeight = 80;
+        // Platform settings
+        const platformWidth = 70;
+        const platformHeight = 15;
+        const minPlatformGap = 60; // Minimum vertical gap between platforms
+        const maxPlatformGap = 100; // Maximum vertical gap between platforms
         
-        // Initial setup
-        player.style.left = `${playerX}px`;
-        player.style.bottom = `${playerY}px`;
+        // Initialize the game
+        function init() {
+            // Reset game variables
+            gameRunning = true;
+            playerX = window.innerWidth / 2;
+            playerY = window.innerHeight - 150;
+            playerVelocityY = 0;
+            playerVelocityX = 0;
+            score = 0;
+            altitude = 0;
+            maxAltitude = 0;
+            viewportOffset = 0;
+            currentLevel = 0;
+            platforms = [];
+            buildings = [];
+            trees = [];
+            clouds = [];
+            stars = [];
+            powerUps = [];
+            coins = [];
+            hasJetpack = false;
+            jetpackTime = 0;
+            hasShield = false;
+            shieldTime = 0;
+            
+            // Reset UI
+            scoreDisplay.textContent = `Score: ${score}`;
+            altitudeDisplay.textContent = `Altitude: ${altitude}m`;
+            altitudeBar.style.height = '0%';
+            
+            // Create initial elements
+            createStars();
+            createInitialBuildings();
+            createInitialTrees();
+            createInitialPlatforms();
+            createInitialClouds();
+            
+            // Set initial player position
+            player.style.left = `${playerX}px`;
+            player.style.bottom = `${playerY}px`;
+            
+            // Start game loop
+            requestAnimationFrame(gameLoop);
+        }
         
-        // Add particle effect function
+        // Create initial buildings
+        function createInitialBuildings() {
+            for (let i = 0; i < 10; i++) {
+                createBuilding(Math.random() * window.innerWidth);
+            }
+        }
+        
+        // Create a building
+        function createBuilding(x) {
+            const building = document.createElement('div');
+            building.className = 'building';
+            
+            const height = 50 + Math.random() * 150;
+            const width = 30 + Math.random() * 50;
+            
+            building.style.left = `${x}px`;
+            building.style.width = `${width}px`;
+            building.style.height = `${height}px`;
+            
+            gameContainer.appendChild(building);
+            buildings.push({
+                element: building,
+                x: x,
+                y: 0,
+                width: width,
+                height: height
+            });
+        }
+        
+        // Create initial trees
+        function createInitialTrees() {
+            for (let i = 0; i < 15; i++) {
+                createTree(Math.random() * window.innerWidth);
+            }
+        }
+        
+        // Create a tree
+        function createTree(x) {
+            const tree = document.createElement('div');
+            tree.className = 'tree';
+            
+            const trunk = document.createElement('div');
+            trunk.className = 'tree-trunk';
+            
+            const top = document.createElement('div');
+            top.className = 'tree-top';
+            
+            tree.appendChild(top);
+            tree.appendChild(trunk);
+            
+            tree.style.left = `${x}px`;
+            
+            gameContainer.appendChild(tree);
+            trees.push({
+                element: tree,
+                x: x,
+                y: 0
+            });
+        }
+        
+        // Create initial platforms
+        function createInitialPlatforms() {
+            // Create ground platform
+            const groundPlatform = {
+                x: 0,
+                y: 100,
+                width: window.innerWidth,
+                element: ground
+            };
+            platforms.push(groundPlatform);
+            
+            // Create platforms above ground
+            for (let y = window.innerHeight - 200; y > -1000; y -= (minPlatformGap + Math.random() * (maxPlatformGap - minPlatformGap))) {
+                createPlatform(y);
+            }
+        }
+        
+        // Create a platform
+        function createPlatform(y, forceType = null) {
+            const platform = document.createElement('div');
+            platform.className = 'platform';
+            
+            // Random platform width
+            const width = platformWidth * (0.7 + Math.random() * 0.6);
+            
+            // Random platform position
+            const x = Math.random() * (window.innerWidth - width);
+            
+            platform.style.width = `${width}px`;
+            platform.style.left = `${x}px`;
+            platform.style.bottom = `${y}px`;
+            
+            // Platform types
+            let type = forceType;
+            if (!type) {
+                const typeRoll = Math.random();
+                if (y > 1000 && typeRoll < 0.1) {
+                    type = 'moving';
+                    platform.classList.add('moving');
+                } else if (y > 2000 && typeRoll < 0.2) {
+                    type = 'breakable';
+                    platform.classList.add('breakable');
+                } else if (y > 3000 && typeRoll < 0.3) {
+                    type = 'bouncy';
+                    platform.classList.add('bouncy');
+                } else {
+                    type = 'normal';
+                }
+            } else {
+                platform.classList.add(forceType);
+            }
+            
+            // Change platform color based on altitude
+            if (y > 5000 && y <= 15000) {
+                platform.style.backgroundColor = "#78909C"; // Mid-altitude color
+            } else if (y > 15000) {
+                platform.style.backgroundColor = "#E0E0E0"; // High-altitude color
+            }
+            
+            gameContainer.appendChild(platform);
+            
+            // Add platform to array
+            platforms.push({
+                x: x,
+                y: y,
+                width: width,
+                element: platform,
+                type: type,
+                active: true
+            });
+            
+            // Sometimes add power-ups or coins above platforms
+            if (y > 1000) {
+                if (Math.random() < 0.05) {
+                    createPowerUp(x + width / 2, y + 30);
+                } else if (Math.random() < 0.2) {
+                    createCoin(x + width / 2, y + 30);
+                }
+            }
+            
+            return platform;
+        }
+        
+        // Create initial clouds
+        function createInitialClouds() {
+            for (let i = 0; i < 10; i++) {
+                createCloud(
+                    Math.random() * window.innerWidth,
+                    500 + Math.random() * 4000
+                );
+            }
+        }
+        
+        // Create a cloud
+        function createCloud(x, y) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            
+            const size = 50 + Math.random() * 100;
+            cloud.style.width = `${size}px`;
+            cloud.style.height = `${size / 2}px`;
+            cloud.style.left = `${x}px`;
+            cloud.style.bottom = `${y}px`;
+            
+            gameContainer.appendChild(cloud);
+            clouds.push({
+                element: cloud,
+                x: x,
+                y: y,
+                size: size
+            });
+        }
+        
+        // Create stars
+        function createStars() {
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const x = Math.random() * window.innerWidth;
+                const y = 10000 + Math.random() * 40000;
+                
+                star.style.left = `${x}px`;
+                star.style.bottom = `${y}px`;
+                
+                if (Math.random() < 0.2) {
+                    star.style.width = '3px';
+                    star.style.height = '3px';
+                    star.style.boxShadow = '0 0 3px 1px white';
+                }
+                
+                if (Math.random() < 0.1) {
+                    star.style.animation = `blink ${2 + Math.random() * 3}s infinite`;
+                }
+                
+                gameContainer.appendChild(star);
+                stars.push({
+                    element: star,
+                    x: x,
+                    y: y
+                });
+            }
+        }
+        
+        // Create a power-up
+        function createPowerUp(x, y) {
+            const powerUp = document.createElement('div');
+            powerUp.className = 'power-up';
+            
+            let type;
+            if (Math.random() < 0.5) {
+                type = 'jetpack';
+                powerUp.classList.add('jetpack');
+            } else {
+                type = 'shield';
+                powerUp.classList.add('shield');
+            }
+            
+            powerUp.style.left = `${x}px`;
+            powerUp.style.bottom = `${y}px`;
+            
+            gameContainer.appendChild(powerUp);
+            powerUps.push({
+                element: powerUp,
+                x: x,
+                y: y,
+                type: type
+            });
+        }
+        
+        // Create a coin
+        function createCoin(x, y) {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            
+            coin.style.left = `${x}px`;
+            coin.style.bottom = `${y}px`;
+            
+            gameContainer.appendChild(coin);
+            coins.push({
+                element: coin,
+                x: x,
+                y: y
+            });
+        }
+        
+        // Create particles
         function createParticles(x, y, count, color) {
             for (let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
+                particle.style.bottom = `${y}px`;
                 particle.style.backgroundColor = color;
                 
-                // Random particle properties
-                const size = Math.random() * 8 + 4;
-                const speedX = (Math.random() - 0.5) * 8;
-                const speedY = (Math.random() - 0.5) * 8;
-                const duration = Math.random() * 1000 + 500;
-                
+                const size = 2 + Math.random() * 5;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
                 
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1 + Math.random() * 3;
+                const velocityX = Math.cos(angle) * speed;
+                const velocityY = Math.sin(angle) * speed;
+                
                 gameContainer.appendChild(particle);
                 
-                // Animate and remove
-                let startTime = Date.now();
-                
-                function animateParticle() {
-                    const elapsed = Date.now() - startTime;
-                    const progress = elapsed / duration;
-                    
-                    if (progress >= 1) {
-                        if (particle.parentNode === gameContainer) {
-                            gameContainer.removeChild(particle);
+                let opacity = 1;
+                const animateParticle = () => {
+                    if (opacity <= 0) {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
                         }
                         return;
                     }
                     
-                    const currentX = parseFloat(particle.style.left) + speedX;
-                    const currentY = parseFloat(particle.style.top) + speedY;
-                    const opacity = 1 - progress;
+                    const currentX = parseFloat(particle.style.left);
+                    const currentY = parseFloat(particle.style.bottom);
                     
-                    particle.style.left = `${currentX}px`;
-                    particle.style.top = `${currentY}px`;
+                    particle.style.left = `${currentX + velocityX}px`;
+                    particle.style.bottom = `${currentY + velocityY}px`;
+                    
+                    opacity -= 0.02;
                     particle.style.opacity = opacity;
                     
                     requestAnimationFrame(animateParticle);
-                }
+                };
                 
                 requestAnimationFrame(animateParticle);
             }
         }
         
-        // Mobile controls event handling
-        leftButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            moveLeft = true;
-            leftButton.style.transform = 'scale(0.95)';
-            leftButton.style.background = 'rgba(255, 255, 255, 0.3)';
-        });
-        
-        leftButton.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            moveLeft = false;
-            leftButton.style.transform = 'scale(1)';
-            leftButton.style.background = 'rgba(255, 255, 255, 0.2)';
-        });
-        
-        rightButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            moveRight = true;
-            rightButton.style.transform = 'scale(0.95)';
-            rightButton.style.background = 'rgba(255, 255, 255, 0.3)';
-        });
-        
-        rightButton.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            moveRight = false;
-            rightButton.style.transform = 'scale(1)';
-            rightButton.style.background = 'rgba(255, 255, 255, 0.2)';
-        });
-        
-        jumpButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (!isJumping) {
-                playerVelocityY = jumpForce;
-                isJumping = true;
-                player.classList.add('jumping');
-                jumpButton.style.transform = 'scale(0.95)';
-                jumpButton.style.background = 'rgba(255, 126, 95, 0.5)';
+        // Check if player is on a platform
+        function isOnPlatform() {
+            if (playerVelocityY > 0) return false; // Rising, not on platform
+            
+            for (let i = 0; i < platforms.length; i++) {
+                const platform = platforms[i];
                 
-                // Jump particles
-                createParticles(playerX, playerY + playerHeight, 10, '#ffffff');
-            }
-        });
-        
-        jumpButton.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            jumpButton.style.transform = 'scale(1)';
-            jumpButton.style.background = 'rgba(255, 126, 95, 0.3)';
-        });
-
-        // Prevent default touch behaviors to avoid scrolling
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
-        
-        // Spawn coins
-        function spawnCoin() {
-            if (!gameRunning) return;
-            
-            const coin = document.createElement('div');
-            coin.className = 'coin';
-            
-            const coinX = Math.random() * (window.innerWidth - 30);
-            const coinY = Math.random() * (window.innerHeight - 200);
-            
-            coin.style.left = `${coinX}px`;
-            coin.style.top = `${coinY}px`;
-            
-            gameContainer.appendChild(coin);
-            
-            // Remove coin after some time if not collected
-            setTimeout(() => {
-                if (coin && coin.parentNode === gameContainer) {
-                    gameContainer.removeChild(coin);
+                // Skip inactive platforms
+                if (platform.type === 'breakable' && !platform.active) continue;
+                
+                // Check collision
+                if (
+                    playerX >= platform.x && 
+                    playerX <= platform.x + platform.width &&
+                    playerY <= platform.y + platformHeight + 5 &&
+                    playerY >= platform.y - 5
+                ) {
+                    // Special platform effects
+                    if (platform.type === 'breakable') {
+                        breakPlatform(platform);
+                        return false; // Falls through
+                    } else if (platform.type === 'bouncy') {
+                        jumpForce = -20; // Extra bounce
+                        createParticles(playerX, playerY, 10, '#AED581');
+                    } else {
+                        jumpForce = -15; // Normal jump
+                    }
+                    
+                    return platform;
                 }
-            }, 5000);
+            }
+            
+            return false;
         }
         
-        // Spawn obstacles
-        function spawnObstacle() {
-            if (!gameRunning) return;
+        // Break a platform
+        function breakPlatform(platform) {
+            platform.active = false;
+            platform.element.style.opacity = '0.5';
+            createParticles(platform.x + platform.width / 2, platform.y, 15, '#FFAB91');
             
-            const obstacle = document.createElement('div');
-            obstacle.className = 'obstacle';
-            
-            const obstacleX = window.innerWidth; // Start from right edge
-            const obstacleY = window.innerHeight - 120; // Just above ground
-            
-            obstacle.style.left = `${obstacleX}px`;
-            obstacle.style.bottom = `${obstacleY}px`;
-            
-            gameContainer.appendChild(obstacle);
-            
-            // Move obstacle from right to left
-            let currentX = obstacleX;
-            const obstacleSpeed = window.innerWidth < 600 ? 2 : 3; // Slower on small screens
-            
-            const obstacleInterval = setInterval(() => {
-                if (!gameRunning) {
-                    clearInterval(obstacleInterval);
-                    return;
+            setTimeout(() => {
+                if (platform.element.parentNode) {
+                    platform.element.parentNode.removeChild(platform.element);
                 }
+                platforms = platforms.filter(p => p !== platform);
+            }, 300);
+        }
+        
+        // Check collision with power-ups
+        function checkPowerUpCollision() {
+            for (let i = 0; i < powerUps.length; i++) {
+                const powerUp = powerUps[i];
                 
-                currentX -= obstacleSpeed;
-                obstacle.style.left = `${currentX}px`;
+                if (
+                    Math.abs(playerX - powerUp.x) < 30 &&
+                    Math.abs(playerY - powerUp.y) < 30
+                ) {
+                    // Collect power-up
+                    if (powerUp.element.parentNode) {
+                        powerUp.element.parentNode.removeChild(powerUp.element);
+                    }
+                    
+                    // Apply power-up effect
+                    if (powerUp.type === 'jetpack') {
+                        hasJetpack = true;
+                        jetpackTime = 300; // Frames of jetpack time (5 seconds at 60fps)
+                        createParticles(playerX, playerY - 20, 20, '#FF9800');
+                        score += 30;
+                    } else if (powerUp.type === 'shield') {
+                        hasShield = true;
+                        shieldTime = 600; // 10 seconds
+                        createParticles(playerX, playerY, 20, '#2196F3');
+                        score += 20;
+                    }
+                    
+                    // Remove from array
+                    powerUps.splice(i, 1);
+                    i--;
+                    
+                    // Update score
+                    scoreDisplay.textContent = `Score: ${score}`;
+                }
+            }
+        }
+        
+        // Check collision with coins
+        function checkCoinCollision() {
+            for (let i = 0; i < coins.length; i++) {
+                const coin = coins[i];
                 
-                // Remove obstacle when it goes off screen
-                if (currentX < -50) {
-                    clearInterval(obstacleInterval);
-                    if (obstacle && obstacle.parentNode === gameContainer) {
-                        gameContainer.removeChild(obstacle);
+                if (
+                    Math.abs(playerX - coin.x) < 25 &&
+                    Math.abs(playerY - coin.y) < 25
+                ) {
+                    // Collect coin
+                    if (coin.element.parentNode) {
+                        coin.element.parentNode.removeChild(coin.element);
+                    }
+                    
+                    // Create particle effect
+                    createParticles(coin.x, coin.y, 10, '#FFD600');
+                    
+                    // Add score
+                    score += 10;
+                    scoreDisplay.textContent = `Score: ${score}`;
+                    
+                    // Remove from array
+                    coins.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+        
+        // Update platform positions (for moving platforms)
+        function updatePlatforms() {
+            for (let i = 0; i < platforms.length; i++) {
+                const platform = platforms[i];
+                
+                if (platform.type === 'moving') {
+                    // Get current transform
+                    const transform = window.getComputedStyle(platform.element).getPropertyValue('transform');
+                    if (transform && transform !== 'none') {
+                        const matrix = new DOMMatrix(transform);
+                        platform.x = parseFloat(platform.element.style.left) + matrix.m41;
                     }
                 }
-                
-                // Check collision with player
-                if (isColliding(
-                    playerX - playerWidth/2, 
-                    playerY, 
-                    playerWidth, 
-                    playerHeight,
-                    currentX, 
-                    obstacleY, 
-                    50, 
-                    30
-                )) {
-                    gameOver();
-                    clearInterval(obstacleInterval);
-                }
-            }, 20);
+            }
         }
         
-        // Collision detection
-        function isColliding(x1, y1, width1, height1, x2, y2, width2, height2) {
-            return (
-                x1 < x2 + width2 &&
-                x1 + width1 > x2 &&
-                y1 < y2 + height2 &&
-                y1 + height1 > y2
-            );
+        // Generate new content as player ascends
+        function generateContent() {
+            const visibleTop = viewportOffset + window.innerHeight;
+            const highestPlatform = Math.max(...platforms.map(p => p.y));
+            
+            // Create new platforms
+            if (highestPlatform < visibleTop + 1000) {
+                for (let y = highestPlatform + minPlatformGap; y < visibleTop + 2000; y += (minPlatformGap + Math.random() * (maxPlatformGap - minPlatformGap))) {
+                    createPlatform(y);
+                }
+            }
+            
+            // Create new clouds
+            if (altitude > 500 && clouds.length < 20 && Math.random() < 0.02) {
+                createCloud(
+                    Math.random() * window.innerWidth,
+                    viewportOffset + window.innerHeight + Math.random() * 500
+                );
+            }
+        }
+        
+        // Update game level based on altitude
+        function updateLevel() {
+            let newLevel = 0;
+            
+            if (altitude > 1000 && altitude <= 5000) {
+                newLevel = 1; // Sky
+            } else if (altitude > 5000 && altitude <= 15000) {
+                newLevel = 2; // Clouds
+            } else if (altitude > 15000 && altitude <= 30000) {
+                newLevel = 3; // Stratosphere
+            } else if (altitude > 30000) {
+                newLevel = 4; // Space
+            }
+            
+            if (newLevel !== currentLevel) {
+                currentLevel = newLevel;
+                levelIndicator.textContent = `Level: ${levelNames[currentLevel]}`;
+                levelIndicator.style.opacity = '1';
+                
+                // Fade out level indicator after 3 seconds
+                setTimeout(() => {
+                    levelIndicator.style.opacity = '0';
+                }, 3000);
+                
+                // Visual changes based on level
+                switch (currentLevel) {
+                    case 1: // Sky
+                        // Already default sky color
+                        break;
+                    case 2: // Clouds
+                        // More blue sky
+                        break;
+                    case 3: // Stratosphere
+                        // Start showing stars
+                        stars.forEach(star => {
+                            if (star.y <= altitude + 2000) {
+                                star.element.style.opacity = '1';
+                            }
+                        });
+                        break;
+                    case 4: // Space
+                        // All stars visible, darker sky
+                        stars.forEach(star => {
+                            star.element.style.opacity = '1';
+                        });
+                        break;
+                }
+            }
+            
+            // Show stars as player ascends
+            if (altitude > 10000) {
+                stars.forEach(star => {
+                    if (star.y <= altitude + 2000) {
+                        star.element.style.opacity = '1';
+                    }
+                });
+            }
+            
+            // Update progress bar
+            const progress = Math.min((altitude / moonHeight) * 100, 100);
+            altitudeBar.style.height = `${progress}%`;
+            
+            // Move sun and moon
+            if (altitude > 1000) {
+                const sunY = 50 - (altitude / 500);
+                sun.style.top = `${Math.max(sunY, -100)}px`;
+                
+                if (altitude > 30000) {
+                    // Start showing the moon
+                    const moonY = -120 + ((altitude - 30000) / 200);
+                    moon.style.top = `${Math.min(moonY, 50)}px`;
+                }
+            }
+            
+            // Change background gradient based on altitude
+            if (altitude < 10000) {
+                // Sky to darker sky
+                const blueRatio = Math.min(altitude / 10000, 1);
+                skyBg.style.background = `linear-gradient(to top, 
+                    var(--sky-color-1) ${10 - blueRatio * 10}%, 
+                    var(--sky-color-2) ${60 - blueRatio * 20}%, 
+                    var(--space-color) ${85 - blueRatio * 15}%)`;
+            } else if (altitude >= 10000 && altitude < 30000) {
+                // Darker sky to space
+                const spaceRatio = Math.min((altitude - 10000) / 20000, 1);
+                skyBg.style.background = `linear-gradient(to top, 
+                    var(--sky-color-2) ${10 - spaceRatio * 10}%, 
+                    var(--space-color) ${60 - spaceRatio * 30}%)`;
+            } else {
+                // Full space background
+                skyBg.style.backgroundColor = 'var(--space-color)';
+            }
         }
         
         // Game over function
         function gameOver() {
             gameRunning = false;
-            finalScoreDisplay.textContent = score;
-            gameOverDisplay.style.display = 'block';
+            finalAltitude.textContent = Math.floor(maxAltitude);
+            finalScore.textContent = score;
+            gameOverScreen.style.display = 'block';
             
-            // Explosion effect
-            createParticles(playerX, playerY + playerHeight/2, 30, '#ff7e5f');
+            // Create explosion effect
+            createParticles(playerX, playerY, 30, '#F44336');
         }
-        
-        // Restart game function
-        function restartGame() {
-            // Clear all coins and obstacles
-            document.querySelectorAll('.coin, .obstacle, .particle').forEach(el => {
-                if (el && el.parentNode) {
-                    el.parentNode.removeChild(el);
-                }
-            });
-            
-            // Reset game variables
-            playerX = window.innerWidth / 2;
-            playerY = window.innerHeight - 180;
-            playerVelocityY = 0;
-            isJumping = false;
-            score = 0;
-            scoreDisplay.textContent = `Score: ${score}`;
-            
-            // Reset player position
-            player.style.left = `${playerX}px`;
-            player.style.bottom = `${playerY}px`;
-            
-            // Hide game over screen
-            gameOverDisplay.style.display = 'none';
-            
-            // Restart game
-            gameRunning = true;
-            gameLoop();
-            startSpawning();
-        }
-        
-        // Input handling for keyboard (keep for desktop compatibility)
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
-                moveLeft = true;
-            } else if (e.key === 'ArrowRight') {
-                moveRight = true;
-            } else if (e.key === ' ' && !isJumping) {
-                // Jump only if on the ground
-                playerVelocityY = jumpForce;
-                isJumping = true;
-                player.classList.add('jumping');
-                
-                // Jump particles
-                createParticles(playerX, playerY + playerHeight, 10, '#ffffff');
-            }
-        });
-        
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowLeft') {
-                moveLeft = false;
-            } else if (e.key === 'ArrowRight') {
-                moveRight = false;
-            }
-        });
-        
-        // Restart button
-        restartButton.addEventListener('click', restartGame);
-        restartButton.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            restartGame();
-        });
         
         // Game loop
         function gameLoop() {
             if (!gameRunning) return;
             
-            // Handle movement
-            if (moveLeft) {
-                playerX -= moveSpeed;
-                if (playerX < playerWidth/2) {
-                    playerX = playerWidth/2;
+            // Apply gravity or jetpack
+            if (hasJetpack && jetpackTime > 0) {
+                playerVelocityY = -5; // Constant upward force
+                jetpackTime--;
+                
+                // Jetpack particles
+                if (gameLoop.frame % 2 === 0) {
+                    createParticles(playerX, playerY - 20, 2, '#FF9800');
                 }
-            }
-            if (moveRight) {
-                playerX += moveSpeed;
-                if (playerX > window.innerWidth - playerWidth/2) {
-                    playerX = window.innerWidth - playerWidth/2;
+                
+                // End jetpack
+                if (jetpackTime <= 0) {
+                    hasJetpack = false;
                 }
+            } else {
+                playerVelocityY += gravity;
             }
             
-            // Apply gravity
-            playerVelocityY += gravity;
-            playerY -= playerVelocityY;
-            
-            // Ground collision
-            if (playerY < 100) {  // Ground height is 100
-                playerY = 100;
-                playerVelocityY = 0;
-                isJumping = false;
-                player.classList.remove('jumping');
+            // Shield countdown
+            if (hasShield && shieldTime > 0) {
+                shieldTime--;
+                // End shield
+                if (shieldTime <= 0) {
+                    hasShield = false;
+                }
             }
             
             // Update player position
-            player.style.left = `${playerX - playerWidth/2}px`;
+            playerY -= playerVelocityY;
+            playerX += playerVelocityX;
+            
+            // Screen boundaries
+            if (playerX < 0) playerX = 0;
+            if (playerX > window.innerWidth) playerX = window.innerWidth;
+            
+            // Check if player is on a platform
+            const platform = isOnPlatform();
+            if (platform && playerVelocityY >= 0) {
+                playerY = platform.y + platformHeight;
+                playerVelocityY = jumpForce;
+                isJumping = true;
+            }
+            
+            // Check power-up collision
+            checkPowerUpCollision();
+            
+            // Check coin collision
+            checkCoinCollision();
+            
+            // Update moving platforms
+            updatePlatforms();
+            
+            // Calculate altitude (highest point reached)
+            altitude = playerY;
+            maxAltitude = Math.max(maxAltitude, altitude);
+            
+            // Update altitude display
+            altitudeDisplay.textContent = `Altitude: ${Math.floor(altitude)}m`;
+            
+            // Generate new content
+            generateContent();
+            
+            // Update level
+            updateLevel();
+            
+            // Check if player fell off screen
+            if (playerY < viewportOffset - 100 && !hasShield) {
+                gameOver();
+                return;
+            }
+            
+            // Check if player reached the moon (win condition)
+            if (altitude >= moonHeight) {
+                // Win game
+                gameRunning = false;
+                finalAltitude.textContent = Math.floor(maxAltitude);
+                finalScore.textContent = score + 1000; // Bonus for reaching the moon
+                document.querySelector('#game-over h2').textContent = 'You Reached the Moon!';
+                gameOverScreen.style.display = 'block';
+                return;
+            }
+            
+            // Scroll view to follow player (with some leeway)
+            const idealOffset = playerY - window.innerHeight / 3;
+            if (idealOffset > viewportOffset) {
+                viewportOffset += (idealOffset - viewportOffset) * 0.1;
+                
+                // Update elements relative to viewport
+                gameContainer.style.transform = `translateY(${-viewportOffset}px)`;
+            }
+            
+            // Update player position
+            player.style.left = `${playerX}px`;
             player.style.bottom = `${playerY}px`;
             
-            // Check coin collisions
-            document.querySelectorAll('.coin').forEach(coin => {
-                if (!coin) return;
-                
-                const coinRect = coin.getBoundingClientRect();
-                const playerRect = player.getBoundingClientRect();
-                
-                if (
-                    playerRect.left < coinRect.right &&
-                    playerRect.right > coinRect.left &&
-                    playerRect.top < coinRect.bottom &&
-                    playerRect.bottom > coinRect.top
-                ) {
-                    // Collect coin
-                    if (coin.parentNode === gameContainer) {
-                        gameContainer.removeChild(coin);
-                    }
-                    
-                    // Update score
-                    score += 10;
-                    scoreDisplay.textContent = `Score: ${score}`;
-                    
-                    // Coin collection effect
-                    createParticles(coinRect.left + coinRect.width/2, coinRect.top + coinRect.height/2, 15, '#FFD700');
-                    
-                    // Score pop-up animation
-                    const scorePopup = document.createElement('div');
-                    scorePopup.textContent = '+10';
-                    scorePopup.style.position = 'absolute';
-                    scorePopup.style.left = `${coinRect.left}px`;
-                    scorePopup.style.top = `${coinRect.top}px`;
-                    scorePopup.style.color = '#FFD700';
-                    scorePopup.style.fontWeight = 'bold';
-                    scorePopup.style.zIndex = '30';
-                    scorePopup.style.pointerEvents = 'none';
-                    gameContainer.appendChild(scorePopup);
-                    
-                    // Animate score popup
-                    let startTime = Date.now();
-                    function animateScore() {
-                        const elapsed = Date.now() - startTime;
-                        if (elapsed > 1000) {
-                            if (scorePopup.parentNode === gameContainer) {
-                                gameContainer.removeChild(scorePopup);
-                            }
-                            return;
-                        }
-                        
-                        scorePopup.style.top = `${parseFloat(scorePopup.style.top) - 1}px`;
-                        scorePopup.style.opacity = 1 - elapsed/1000;
-                        
-                        requestAnimationFrame(animateScore);
-                    }
-                    animateScore();
-                }
-            });
+            // Visual effects for player
+            if (hasJetpack) {
+                player.style.filter = 'drop-shadow(0 0 10px #FF9800)';
+            } else if (hasShield) {
+                player.style.filter = 'drop-shadow(0 0 10px #2196F3)';
+            } else {
+                player.style.filter = 'none';
+            }
             
             // Continue game loop
+            gameLoop.frame = (gameLoop.frame || 0) + 1;
             requestAnimationFrame(gameLoop);
         }
         
-        // Start spawning coins and obstacles
-        function startSpawning() {
-            // Spawn coins
-            const coinInterval = setInterval(() => {
-                if (gameRunning) {
-                    spawnCoin();
-                } else {
-                    clearInterval(coinInterval);
-                }
-            }, 1000);
+        // Handle touch input
+        function handleTouchMove(e) {
+            e.preventDefault();
             
-            // Spawn obstacles
-            const obstacleInterval = setInterval(() => {
-                if (gameRunning) {
-                    spawnObstacle();
-                } else {
-                    clearInterval(obstacleInterval);
-                }
-            }, 2000);
+            // Get touch position
+            const touch = e.touches[0];
+            const touchX = touch.clientX;
+            
+            // Move player based on which side of screen is touched
+            if (touchX < window.innerWidth / 2) {
+                // Move left
+                playerVelocityX = -4;
+                player.style.transform = 'translateX(-50%) scaleX(-1)'; // Flip sprite
+            } else {
+                // Move right
+                playerVelocityX = 4;
+                player.style.transform = 'translateX(-50%) scaleX(1)'; // Normal sprite
+            }
         }
         
-        // Start the game
-        gameLoop();
-        startSpawning();
+        function handleTouchEnd() {
+            // Stop moving
+            playerVelocityX = 0;
+        }
+        
+        // Handle keyboard input (for testing on desktop)
+        function handleKeyDown(e) {
+            if (e.key === 'ArrowLeft') {
+                playerVelocityX = -4;
+                player.style.transform = 'translateX(-50%) scaleX(-1)'; // Flip sprite
+            } else if (e.key === 'ArrowRight') {
+                playerVelocityX = 4;
+                player.style.transform = 'translateX(-50%) scaleX(1)'; // Normal sprite
+            }
+        }
+        
+        function handleKeyUp(e) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                playerVelocityX = 0;
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+        restartButton.addEventListener('click', () => {
+            gameOverScreen.style.display = 'none';
+            init();
+        });
+        
+        // Start button
+        startButton.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            init();
+        });
     </script>
 </body>
 </html>
