@@ -41,6 +41,15 @@
             overflow: hidden;
         }
         
+        /* Game world - all game elements go inside this container */
+        #game-world {
+            position: absolute;
+            width: 100%;
+            height: 300%;
+            bottom: 0;
+            left: 0;
+        }
+        
         /* Background Layers */
         .bg-layer {
             position: absolute;
@@ -422,20 +431,23 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- Background layers -->
-        <div id="sky-bg" class="bg-layer"></div>
+        <!-- Game world - all game elements go inside this container -->
+        <div id="game-world">
+            <!-- Background layers -->
+            <div id="sky-bg" class="bg-layer"></div>
+            
+            <!-- Celestial bodies -->
+            <div id="sun"></div>
+            <div id="moon"></div>
+            
+            <!-- Player character -->
+            <img id="player" src="images/placeholder.png" alt="Player">
+            
+            <!-- Ground -->
+            <div id="ground"></div>
+        </div>
         
-        <!-- Celestial bodies -->
-        <div id="sun"></div>
-        <div id="moon"></div>
-        
-        <!-- Player character -->
-        <img id="player" src="images/placeholder.png" alt="Player">
-        
-        <!-- Ground -->
-        <div id="ground"></div>
-        
-        <!-- UI Elements -->
+        <!-- UI Elements (outside the scrolling game world) -->
         <div id="score-display">Score: 0</div>
         <div id="altitude-display">Altitude: 0m</div>
         <div id="altitude-indicator">
@@ -468,9 +480,9 @@
         let playerY = window.innerHeight - 150;
         let playerVelocityY = 0;
         let playerVelocityX = 0;
-        let gravity = 0.4;
-        let jumpForce = -15;
-        let isJumping = true;
+        let gravity = 0.3; // Reduced gravity
+        let jumpForce = -13;
+        let isJumping = false; // Start not jumping
         let score = 0;
         let altitude = 0;
         let maxAltitude = 0;
@@ -489,9 +501,11 @@
         let jetpackTime = 0;
         let hasShield = false;
         let shieldTime = 0;
+        let debugMode = false; // Set to true to see collision boxes
         
         // DOM elements
         const gameContainer = document.getElementById('game-container');
+        const gameWorld = document.getElementById('game-world');
         const player = document.getElementById('player');
         const ground = document.getElementById('ground');
         const scoreDisplay = document.getElementById('score-display');
@@ -516,10 +530,17 @@
         
         // Initialize the game
         function init() {
+            // Clean up any existing elements first
+            document.querySelectorAll('.platform:not(#ground), .building, .tree, .cloud, .star, .power-up, .coin, .particle').forEach(el => {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+            
             // Reset game variables
             gameRunning = true;
             playerX = window.innerWidth / 2;
-            playerY = window.innerHeight - 150;
+            playerY = window.innerHeight - 120; // Start closer to ground
             playerVelocityY = 0;
             playerVelocityX = 0;
             score = 0;
@@ -544,12 +565,32 @@
             altitudeDisplay.textContent = `Altitude: ${altitude}m`;
             altitudeBar.style.height = '0%';
             
+            // Reset game world position
+            gameWorld.style.transform = 'translateY(0)';
+            
             // Create initial elements
             createStars();
             createInitialBuildings();
             createInitialTrees();
             createInitialPlatforms();
             createInitialClouds();
+            
+            // Make sure we have a platform right under the player for the first jump
+            const startPlatform = document.createElement('div');
+            startPlatform.className = 'platform';
+            startPlatform.style.width = '100px';
+            startPlatform.style.left = `${playerX - 50}px`;
+            startPlatform.style.bottom = `${playerY - 10}px`;
+            gameWorld.appendChild(startPlatform);
+            
+            platforms.push({
+                x: playerX - 50,
+                y: playerY - 10,
+                width: 100,
+                element: startPlatform,
+                type: 'normal',
+                active: true
+            });
             
             // Set initial player position
             player.style.left = `${playerX}px`;
@@ -578,7 +619,7 @@
             building.style.width = `${width}px`;
             building.style.height = `${height}px`;
             
-            gameContainer.appendChild(building);
+            gameWorld.appendChild(building);
             buildings.push({
                 element: building,
                 x: x,
@@ -611,7 +652,7 @@
             
             tree.style.left = `${x}px`;
             
-            gameContainer.appendChild(tree);
+            gameWorld.appendChild(tree);
             trees.push({
                 element: tree,
                 x: x,
@@ -626,12 +667,19 @@
                 x: 0,
                 y: 100,
                 width: window.innerWidth,
-                element: ground
+                element: ground,
+                type: 'normal',
+                active: true
             };
             platforms.push(groundPlatform);
             
-            // Create platforms above ground
-            for (let y = window.innerHeight - 200; y > -1000; y -= (minPlatformGap + Math.random() * (maxPlatformGap - minPlatformGap))) {
+            // Create more frequent platforms at the beginning to help the player get started
+            for (let y = window.innerHeight - 200; y > window.innerHeight - 600; y -= 60) {
+                createPlatform(y);
+            }
+            
+            // Then create platforms with normal spacing
+            for (let y = window.innerHeight - 600; y > -1000; y -= (minPlatformGap + Math.random() * (maxPlatformGap - minPlatformGap))) {
                 createPlatform(y);
             }
         }
@@ -678,7 +726,7 @@
                 platform.style.backgroundColor = "#E0E0E0"; // High-altitude color
             }
             
-            gameContainer.appendChild(platform);
+            gameWorld.appendChild(platform);
             
             // Add platform to array
             platforms.push({
@@ -723,7 +771,7 @@
             cloud.style.left = `${x}px`;
             cloud.style.bottom = `${y}px`;
             
-            gameContainer.appendChild(cloud);
+            gameWorld.appendChild(cloud);
             clouds.push({
                 element: cloud,
                 x: x,
@@ -754,7 +802,7 @@
                     star.style.animation = `blink ${2 + Math.random() * 3}s infinite`;
                 }
                 
-                gameContainer.appendChild(star);
+                gameWorld.appendChild(star);
                 stars.push({
                     element: star,
                     x: x,
@@ -780,7 +828,7 @@
             powerUp.style.left = `${x}px`;
             powerUp.style.bottom = `${y}px`;
             
-            gameContainer.appendChild(powerUp);
+            gameWorld.appendChild(powerUp);
             powerUps.push({
                 element: powerUp,
                 x: x,
@@ -797,7 +845,7 @@
             coin.style.left = `${x}px`;
             coin.style.bottom = `${y}px`;
             
-            gameContainer.appendChild(coin);
+            gameWorld.appendChild(coin);
             coins.push({
                 element: coin,
                 x: x,
@@ -823,7 +871,7 @@
                 const velocityX = Math.cos(angle) * speed;
                 const velocityY = Math.sin(angle) * speed;
                 
-                gameContainer.appendChild(particle);
+                gameWorld.appendChild(particle);
                 
                 let opacity = 1;
                 const animateParticle = () => {
@@ -852,7 +900,12 @@
         
         // Check if player is on a platform
         function isOnPlatform() {
-            if (playerVelocityY > 0) return false; // Rising, not on platform
+            // Only check for platform collision if player is moving downward or at rest
+            if (playerVelocityY < -2) return false; // Strong upward movement, not on platform
+            
+            // Get player hitbox (smaller than visual size)
+            const playerHitboxWidth = 30;
+            const playerFeet = playerY - 5; // Bottom of player hitbox
             
             for (let i = 0; i < platforms.length; i++) {
                 const platform = platforms[i];
@@ -860,22 +913,32 @@
                 // Skip inactive platforms
                 if (platform.type === 'breakable' && !platform.active) continue;
                 
-                // Check collision
+                // Check collision - player's position (center point) must be within platform width
+                // and player's feet must be at or slightly below platform top
                 if (
                     playerX >= platform.x && 
                     playerX <= platform.x + platform.width &&
-                    playerY <= platform.y + platformHeight + 5 &&
-                    playerY >= platform.y - 5
+                    playerFeet <= platform.y + platformHeight + 10 && // Allow a bit of overlap
+                    playerFeet >= platform.y - 10 // Allow a bit of range for collision
                 ) {
+                    // Debug visualization of collision
+                    if (debugMode) {
+                        console.log("Collision with platform:", platform);
+                        platform.element.style.border = "2px solid red";
+                        setTimeout(() => {
+                            platform.element.style.border = "none";
+                        }, 300);
+                    }
+                    
                     // Special platform effects
                     if (platform.type === 'breakable') {
                         breakPlatform(platform);
                         return false; // Falls through
                     } else if (platform.type === 'bouncy') {
-                        jumpForce = -20; // Extra bounce
+                        jumpForce = -18; // Extra bounce
                         createParticles(playerX, playerY, 10, '#AED581');
                     } else {
-                        jumpForce = -15; // Normal jump
+                        jumpForce = -13; // Normal jump
                     }
                     
                     return platform;
@@ -1125,7 +1188,10 @@
                     hasJetpack = false;
                 }
             } else {
+                // Apply gravity with a terminal velocity
                 playerVelocityY += gravity;
+                // Limit maximum falling speed
+                if (playerVelocityY > 12) playerVelocityY = 12;
             }
             
             // Shield countdown
@@ -1142,15 +1208,29 @@
             playerX += playerVelocityX;
             
             // Screen boundaries
-            if (playerX < 0) playerX = 0;
-            if (playerX > window.innerWidth) playerX = window.innerWidth;
+            if (playerX < 25) playerX = 25;
+            if (playerX > window.innerWidth - 25) playerX = window.innerWidth - 25;
             
             // Check if player is on a platform
             const platform = isOnPlatform();
-            if (platform && playerVelocityY >= 0) {
+            if (platform) {
+                // Land on the platform
                 playerY = platform.y + platformHeight;
                 playerVelocityY = jumpForce;
                 isJumping = true;
+                
+                // Jump particles
+                createParticles(playerX, playerY, 5, '#ffffff');
+                
+                // Make player bounce slightly for visual effect
+                player.animate([
+                    { transform: 'translateX(-50%) scaleY(0.8)' },
+                    { transform: 'translateX(-50%) scaleY(1.1)' },
+                    { transform: playerVelocityX < 0 ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%) scaleX(1)' }
+                ], {
+                    duration: 300,
+                    easing: 'ease-out'
+                });
             }
             
             // Check power-up collision
@@ -1175,10 +1255,28 @@
             // Update level
             updateLevel();
             
-            // Check if player fell off screen
-            if (playerY < viewportOffset - 100 && !hasShield) {
-                gameOver();
-                return;
+            // Add shield at the start to prevent instant death
+            if (gameLoop.frame < 100 && !hasShield) {
+                hasShield = true;
+                shieldTime = 100;
+            }
+            
+            // Check if player fell off screen (with a bigger margin)
+            if (playerY < viewportOffset - 150) {
+                if (hasShield) {
+                    // Use shield to save player
+                    hasShield = false;
+                    shieldTime = 0;
+                    // Teleport player to last safe position
+                    playerY = viewportOffset + 100;
+                    playerVelocityY = jumpForce;
+                    // Visual effect for shield use
+                    createParticles(playerX, playerY, 20, '#2196F3');
+                } else {
+                    // Game over
+                    gameOver();
+                    return;
+                }
             }
             
             // Check if player reached the moon (win condition)
@@ -1197,8 +1295,8 @@
             if (idealOffset > viewportOffset) {
                 viewportOffset += (idealOffset - viewportOffset) * 0.1;
                 
-                // Update elements relative to viewport
-                gameContainer.style.transform = `translateY(${-viewportOffset}px)`;
+                // Move the game world instead of the container
+                gameWorld.style.transform = `translateY(${viewportOffset}px)`;
             }
             
             // Update player position
