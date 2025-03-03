@@ -29,3 +29,26 @@ body::before {
   from { transform: translate(0,0); }
   to   { transform: translate(-5%, -5%); }
 }
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.8; filter: brightness(100%); }
+  50% { opacity: 1; filter: brightness(130%); }    /* brief brighten */
+  52% { opacity: 0.6; filter: brightness(70%); }    /* quick dim */
+  54% { opacity: 1; filter: brightness(130%); }    /* back bright */
+}
+/* Apply flicker intermittently on the fog layer */
+body::before {
+  /* ...other styles... */
+  animation: drift 10s linear infinite alternate, flicker 3s infinite;
+}
+
+h1, p { 
+  text-shadow: 0 0 10px rgba(255,0,0,0.3);
+  transition: text-shadow 0.2s;
+}
+/* During flicker, intensify shadow via JS class toggle */
+.flicker-active h1, .flicker-active p {
+  text-shadow: 0 0 20px rgba(255,0,0,0.6);
+}
+
+
