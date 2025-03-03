@@ -1,0 +1,53 @@
+/* Tailwind base and components are loaded via the CDN in index.html. */
+/* You can add custom overrides or additional styles below. */
+
+/* Example custom style for hover effect on the hero image */
+#hero-image:hover {
+  transform: translateY(-4px);
+  transition: transform 0.3s ease;
+}
+
+/* You could add more custom styles or media queries here if needed */
+
+body {
+  background: #000;
+  position: relative;
+  overflow: hidden;
+}
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0; /* covers entire viewport */
+  background: radial-gradient(circle at 50% 50%, rgba(255,0,0,0.3), transparent 60%),
+              radial-gradient(circle at 30% 70%, rgba(255,0,0,0.15), transparent 70%);
+  filter: blur(30px);
+  opacity: 0.8;
+  animation: drift 10s linear infinite alternate;
+  z-index: -1; /* behind content */
+}
+@keyframes drift {
+  from { transform: translate(0,0); }
+  to   { transform: translate(-5%, -5%); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.8; filter: brightness(100%); }
+  50% { opacity: 1; filter: brightness(130%); }    /* brief brighten */
+  52% { opacity: 0.6; filter: brightness(70%); }    /* quick dim */
+  54% { opacity: 1; filter: brightness(130%); }    /* back bright */
+}
+/* Apply flicker intermittently on the fog layer */
+body::before {
+  /* ...other styles... */
+  animation: drift 10s linear infinite alternate, flicker 3s infinite;
+}
+
+h1, p { 
+  text-shadow: 0 0 10px rgba(255,0,0,0.3);
+  transition: text-shadow 0.2s;
+}
+/* During flicker, intensify shadow via JS class toggle */
+.flicker-active h1, .flicker-active p {
+  text-shadow: 0 0 20px rgba(255,0,0,0.6);
+}
+
