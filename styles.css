@@ -4,6 +4,11 @@
 	text-align: center;
 }
 
+.contact {
+	text-align: center;
+	
+}
+
 nav ul {
 	list-style-type: none;
 	display: flex;
