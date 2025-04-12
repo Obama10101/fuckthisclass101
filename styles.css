@@ -6,7 +6,14 @@
 
 .contact {
 	text-align: center;
-	
+
+}
+
+.centerImage {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 50%;
 }
 
 nav ul {
