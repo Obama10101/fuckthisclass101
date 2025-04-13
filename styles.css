@@ -1,3 +1,10 @@
+body {
+	background-color: #f0f0f0; /* Light gray color - change as desired */
+	/* Or use an image background: */
+	/* background-image: url('images/background.jpg'); */
+	/* background-size: cover; */
+}
+
 .title {
 	background-color: black;
 	color: white;
