@@ -66,9 +66,8 @@ nav a:hover {
 	text-decoration: underline;
 }
 
-.center-container {
-    width: 100%;
-    text-align: center;
-    display: block;
-    margin: 0 auto;
+.center-container > * {
+    display: block !important;
+    margin: 10px auto;
+    width: auto;
 }
