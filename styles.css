@@ -65,3 +65,8 @@ nav a {
 nav a:hover {
 	text-decoration: underline;
 }
+
+.center-container {
+    width: 100%;
+    text-align: center;
+}
